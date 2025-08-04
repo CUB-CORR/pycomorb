@@ -1,0 +1,110 @@
+index,category,icd10_codes,weight
+0,Dementia in Alzheimer's disease,F00,7.1
+1,Hemiplegia,G81,4.4
+2,Alzheimer's disease,G30,4.0
+3,Sequelae of cerebrovascular disease (secondary codes),I69,3.7
+4,Other symptoms and signs involving the nervous and musculoskeletal systems (R29.6 Tendency to fall),R29,3.6
+5,Other disorders of urinary system (includes urinary tract infection and urinary incontinence),N39,3.2
+6,"Delirium, not induced by alcohol and other psychoactive substances",F05,3.2
+7,Unspecified fall,W19,3.2
+8,Superficial injury of head,S00,3.2
+9,Unspecified haematuria,R31,3.0
+10,Other bacterial agents as the cause of diseases classified to other chapters (secondary code),B96,2.9
+11,Other symptoms and signs involving cognitive functions and awareness,R41,2.7
+12,Abnormalities of gait and mobility,R26,2.6
+13,Other cerebrovascular diseases,I67,2.6
+14,"Convulsions, not elsewhere classified",R56,2.6
+15,"Somnolence, stupor and coma",R40,2.5
+16,"Complications of genitourinary prosthetic devices, implants and grafts",T83,2.4
+17,Intracranial injury,S06,2.4
+18,Fracture of shoulder and upper arm,S42,2.3
+19,"Other disorders of fluid, electrolyte and acid-base balance",E87,2.3
+20,"Other joint disorders, not elsewhere classified",M25,2.3
+21,Volume depletion,E86,2.3
+22,Senility,R54,2.2
+23,Care involving use of rehabilitation procedures,Z50,2.1
+24,Unspecified dementia,F03,2.1
+25,Other fall on same level,W18,2.1
+26,Problems related to medical facilities and other health care,Z75,2.0
+27,Vascular dementia,F01,2.0
+28,Superficial injury of lower leg,S80,2.0
+29,Cellulitis,L03,2.0
+30,Blindness and low vision,H54,1.9
+31,Deficiency of other B group vitamins,E53,1.9
+32,Problems related to social environment,Z60,1.8
+33,Parkinson's disease,G20,1.8
+34,Syncope and collapse,R55,1.8
+35,"Fracture of rib(s), sternum and thoracic spine",S22,1.8
+36,Other functional intestinal disorders,K59,1.8
+37,Acute renal failure,N17,1.8
+38,Decubitus ulcer,L89,1.7
+39,Carrier of infectious disease,Z22,1.7
+40,Streptococcus and staphylococcus as the cause of diseases classified to other chapters,B95,1.7
+41,"Ulcer of lower limb, not elsewhere classified",L97,1.6
+42,Other symptoms and signs involving general sensations and perceptions,R44,1.6
+43,Duodenal ulcer,K26,1.6
+44,Hypotension,I95,1.6
+45,Unspecified renal failure,N19,1.6
+46,Other septicaemia,A41,1.6
+47,Personal history of other diseases and conditions,Z87,1.5
+48,"Respiratory failure, not elsewhere classified",J96,1.5
+49,Exposure to unspecified factor,X59,1.5
+50,Other arthrosis,M19,1.5
+51,Epilepsy,G40,1.5
+52,Osteoporosis without pathological fracture,M81,1.4
+53,Fracture of femur,S72,1.4
+54,Fracture of lumbar spine and pelvis,S32,1.4
+55,Other disorders of pancreatic internal secretion,E16,1.4
+56,Abnormal results of function studies,R94,1.4
+57,Chronic renal failure,N18,1.4
+58,Retention of urine,R33,1.3
+59,Unknown and unspecified causes of morbidity,R69,1.3
+60,"Other disorders of kidney and ureter, not elsewhere classified",N28,1.3
+61,Unspecified urinary incontinence,R32,1.2
+62,"Other degenerative diseases of nervous system, not elsewhere classified",G31,1.2
+63,Nosocomial condition,Y95,1.2
+64,Other and unspecified injuries of head,S09,1.2
+65,Symptoms and signs involving emotional state,R45,1.2
+66,Transient cerebral ischaemic attacks and related syndromes,G45,1.2
+67,Problems related to care-provider dependency,Z74,1.1
+68,"Other soft tissue disorders, not elsewhere classified",M79,1.1
+69,Fall involving bed,W06,1.1
+70,Open wound of head,S01,1.1
+71,Other bacterial intestinal infections,A04,1.1
+72,Diarrhoea and gastroenteritis of presumed infectious origin,A09,1.1
+73,"Pneumonia, organism unspecified",J18,1.1
+74,Pneumonitis due to solids and liquids,J69,1.0
+75,"Speech disturbances, not elsewhere classified",R47,1.0
+76,Vitamin D deficiency,E55,1.0
+77,Artificial opening status,Z93,1.0
+78,"Gangrene, not elsewhere classified",R02,1.0
+79,Symptoms and signs concerning food and fluid intake,R63,0.9
+80,Other hearing loss,H91,0.9
+81,Fall on and from stairs and steps,W10,0.9
+82,"Fall on same level from slipping, tripping and stumbling",W01,0.9
+83,Thyrotoxicosis [hyperthyroidism],E05,0.9
+84,Scoliosis,M41,0.9
+85,Dysphagia,R13,0.8
+86,Dependence on enabling machines and devices,Z99,0.8
+87,Agent resistant to penicillin and related antibiotics,U80,0.8
+88,Osteoporosis with pathological fracture,M80,0.8
+89,Other diseases of digestive system,K92,0.8
+90,Cerebral Infarction,I63,0.8
+91,Calculus of kidney and ureter,N20,0.7
+92,Mental and behavioural disorders due to use of alcohol,F10,0.7
+93,Other medical procedures as the cause of abnormal reaction of the patient,Y84,0.7
+94,Abnormalities of heart beat,R00,0.7
+95,Unspecified acute lower respiratory infection,J22,0.7
+96,Problems related to life-management difficulty,Z73,0.6
+97,Other abnormal findings of blood chemistry,R79,0.6
+98,"Personal history of risk-factors, not elsewhere classified",Z91,0.5
+99,Open wound of forearm,S51,0.5
+100,Depressive episode,F32,0.5
+101,Spinal stenosis (secondary code only),M48,0.5
+102,Disorders of mineral metabolism,E83,0.4
+103,Polyarthrosis,M15,0.4
+104,Other anaemias,D64,0.4
+105,Other local infections of skin and subcutaneous tissue,L08,0.4
+106,Nausea and vomiting,R11,0.3
+107,Other noninfective gastroenteritis and colitis,K52,0.3
+108,Fever of unknown origin,R50,0.1

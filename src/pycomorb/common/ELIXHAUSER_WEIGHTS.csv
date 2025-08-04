@@ -1,0 +1,32 @@
+index,category,van_walraven_weights,thompson_30_weights,thompson_29_weights,AHRQ_weights
+0,Congestive heart failure,7,9,9,9
+1,Cardiac arrhythmias,5,8,0,0
+2,Valvular disease,-1,0,0,0
+3,Pulmonary circulation disorders,4,5,5,6
+4,Peripheral vascular disorders,2,4,4,3
+5,Hypertension uncomplicated,0,-2,-1,-1
+6,Hypertension complicated,0,-2,-1,1
+7,Paralysis,7,4,3,5
+8,Other neurological disorders,6,5,4,5
+9,Chronic pulmonary disease,3,3,3,3
+10,Diabetes uncomplicated,0,0,-1,0
+11,Diabetes complicated,0,1,0,-3
+12,Hypothyroidism,0,0,0,0
+13,Renal failure,5,7,6,6
+14,Liver disease,11,7,5,4
+15,Peptic ulcer disease excluding bleeding,0,0,0,0
+16,AIDS/HIV,0,0,0,0
+17,Lymphoma,9,8,6,6
+18,Metastatic cancer,12,17,13,14
+19,Solid tumor without metastasis,4,10,8,7
+20,Rheumatoid arthritis/collagen vascular diseases,0,0,0,0
+21,Coagulopathy,3,12,9,11
+22,Obesity,-4,-5,-4,-5
+23,Weight loss,6,10,8,9
+24,Fluid and electrolyte disorders,5,11,9,11
+25,Blood loss anemia,-2,-3,-2,-3
+26,Deficiency anemia,-2,0,0,-2
+27,Alcohol abuse,0,0,-2,-1
+28,Drug abuse,-7,-11,-8,-7
+29,Psychoses,0,-6,-4,-5
+30,Depression,-3,-5,-4,-5
