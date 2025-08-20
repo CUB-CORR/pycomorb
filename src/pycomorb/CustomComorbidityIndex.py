@@ -170,7 +170,9 @@ def CustomComorbidityIndex(
 
         # Combine: outer join on id_col, take max for each category
         all_categories = sorted(set(cats9) | set(cats10))
-        df_combined = df9.join(df10, on=id_col, how="outer", suffix="_right")
+        df_combined = df9.join(
+            df10, on=id_col, how="outer", suffix="_right", coalesce=True
+        )
         for cat in all_categories:
             left = cat
             right = f"{cat}_right"

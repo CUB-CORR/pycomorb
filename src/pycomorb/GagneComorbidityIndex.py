@@ -36,6 +36,7 @@ def GagneComorbidityIndex(
     icd_version: str = "icd9",
     icd_version_col: str = None,
     return_categories=False,
+    gagne_name: bool = False,
 ):
     """
     Calculate the Gagne Comorbidity Index using ICD codes.
@@ -49,7 +50,7 @@ def GagneComorbidityIndex(
         return_categories (bool): If True, also return presence indicators for each Gagne category.
 
     Returns:
-        - DataFrame with [id_col, "Gagne Score"].
+        - DataFrame with [id_col, "Combined Comorbidity Score"].
         - DataFrame with category indicators if return_categories is True, else None.
     """
 
@@ -68,9 +69,9 @@ def GagneComorbidityIndex(
     definition_file = "GAGNE.csv"
     definition_file_path = Path(__file__).parent / f"common/{definition_file}"
     weight_col_name = "weights"
-    score_col_name = "Gagne Score"
+    score_col_name = "Gagne Score" if gagne_name else "Combined Comorbidity Score"
 
-    # Define mutual exclusion rules for Gagne
+    # Define mutual exclusion rules for combined score
     mutual_exclusion_rules = [
         ("Complicated diabetes", "Uncomplicated diabetes")
     ]
