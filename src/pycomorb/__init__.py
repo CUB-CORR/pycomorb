@@ -2,7 +2,7 @@
 
 __author__ = """Finn Fassbender"""
 __email__ = "finn.fassbender@charite.de"
-__version__ = "0.4.2"
+__version__ = "0.5.1"
 
 from .CharlsonComorbidityIndex import CharlsonComorbidityIndex
 from .ElixhauserComorbidityIndex import ElixhauserComorbidityIndex
