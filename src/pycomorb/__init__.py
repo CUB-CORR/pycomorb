@@ -9,6 +9,7 @@ from .ElixhauserComorbidityIndex import ElixhauserComorbidityIndex
 from .GagneComorbidityIndex import GagneComorbidityIndex
 from .CustomComorbidityIndex import CustomComorbidityIndex
 from .HospitalFrailtyRiskScore import HospitalFrailtyRiskScore
+from .ICDModifications import get_icd10gm
 
 
 def comorbidity(
@@ -18,10 +19,11 @@ def comorbidity(
     code_col: str = "code",
     age_col: str = "age",
     icd_version="icd10",
-    icd_version_col=None,
+    year_col: str = "year",
     icd_version: str = "icd10",
     icd_version_col: str = None,
-    return_categories=False,
+    icd_modification: str = None,
+    icd_modification_target_year: int = 2004,
     implementation: str = None,
     weights: str = None,
     definition_data=None,
@@ -40,8 +42,11 @@ def comorbidity(
         id_col (str): Name of the column containing unique identifier. Default: "id".
         code_col (str): Name of the column containing ICD codes. Default: "code".
         age_col (str): Name of the column containing patient ages (Charlson only). Default: "age".
+        year_col (str): Name of the column containing the year of the ICD code (for ICD history modifications). Default: "year".
         icd_version (str): ICD version. Default: "icd10".
         icd_version_col (str, optional): Name of the column with ICD version for 'icd9_10'. Default: None.
+        icd_modification (str, optional): ICD modification to apply ('icd10gm'). Default: None.
+        icd_modification_target_year (int): Target year for ICD modification (if applicable). Default: 2004.
         implementation (str, optional): Implementation variant (see individual index docs).
         weights (str, optional): Weighting scheme (Elixhauser only).
         definition_data (DataFrame, optional): DataFrame with ICD definitions and weights (Custom only).
@@ -55,6 +60,20 @@ def comorbidity(
         - DataFrame with [id_col, score].
         - DataFrame with category indicators if return_categories is True, else None.
     """
+    # apply ICD modification if requested
+    if icd_modification is not None:
+        if icd_modification.lower() == "icd10gm":
+            df = get_icd10gm(
+                data=df,
+                code_col=code_col,
+                year_col=year_col,
+                target_year=icd_modification_target_year,
+            )
+            code_col = f"icd10gm_{icd_modification_target_year}"
+        else:
+            raise ValueError(f"Unknown icd_modification: '{icd_modification}'. Currently, only 'icd10gm' is supported.") # fmt: skip
+
+    # calculate scores
     score = score.lower()
     if score in (
         "cci",

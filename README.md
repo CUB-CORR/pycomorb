@@ -8,6 +8,8 @@ Python package to calculate comorbidity and frailty scores using ICD codes and p
 
 It is inspired by the R package [`comorbidity`](https://github.com/ellessenne/comorbidity) by Alessandro Gasparini and the corresponding Python rewrite [`comorbidipy`](https://github.com/vvcb/comorbidipy) by Vishnu V Chandrabalan.
 
+As a special feature, it also implements the history of the German Modification of the ICD-10 (ICD-10-GM) coding system, allowing users to apply the correct mappings and weights based on the year of diagnosis.
+
 ## Included Indices / Scores
 
 - **Charlson Comorbidity Index** (multiple mappings and weights)
@@ -93,3 +95,4 @@ See the docstrings in each module for details on arguments and supported variant
 
 - Free software: MIT license
 - Documentation: (TODO)
+- _Die Erstellung erfolgt unter Verwendung der maschinenlesbaren Fassung des Bundesinstituts für Arzneimittel und Medizinprodukte (BfArM)._
