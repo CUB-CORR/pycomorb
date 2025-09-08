@@ -1,6 +1,6 @@
 [project]
 name = "pycomorb"
-version = "0.5.1"
+version = "0.5.2"
 authors = [
   { name="Finn Fassbender", email="finn.fassbender@charite.de" },
 ]

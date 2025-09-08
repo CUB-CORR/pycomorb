@@ -2,7 +2,7 @@
 
 __author__ = """Finn Fassbender"""
 __email__ = "finn.fassbender@charite.de"
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 
 from .CharlsonComorbidityIndex import CharlsonComorbidityIndex
 from .ElixhauserComorbidityIndex import ElixhauserComorbidityIndex
@@ -18,7 +18,6 @@ def comorbidity(
     id_col: str = "id",
     code_col: str = "code",
     age_col: str = "age",
-    icd_version="icd10",
     year_col: str = "year",
     icd_version: str = "icd10",
     icd_version_col: str = None,
