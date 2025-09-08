@@ -21,6 +21,10 @@
 #    Coding algorithms for defining comorbidities in ICD-9-CM and ICD-10 administrative data.
 #    Med Care. 2005 Nov;43(11):1130-9.
 #    doi: 10.1097/01.mlr.0000182534.19832.83. PMID: 16224307.
+# 7. Armitage JN, van der Meulen JH; Royal College of Surgeons Co-morbidity Consensus Group.
+#    Identifying co-morbidity in surgical patients using administrative data with the Royal College of Surgeons Charlson Score.
+#    Br J Surg. 2010 May;97(5):772-81.
+#    doi: 10.1002/bjs.6930. PMID: 20306528.
 
 from pathlib import Path
 
@@ -51,7 +55,7 @@ def CharlsonComorbidityIndex(
         age_col (str): Name of the column containing patient ages. Default: "age".
         icd_version (str): ICD version ('icd9', 'icd10', or 'icd9_10'). Default: "icd10".
         icd_version_col (str, optional): Name of the column with ICD version for 'icd9_10'. Default: None.
-        implementation (str): CCI implementation ('quan', 'deyo', 'romano', 'australia', 'sweden', 'uk_shmi'). Default: "quan".
+        implementation (str): CCI implementation ('quan', 'deyo', 'romano', 'australia', 'sweden', 'rcs', 'uk_shmi'). Default: "quan".
         return_categories (bool): If True, also return presence indicators for each CCI category.
 
     Returns:
@@ -76,6 +80,7 @@ def CharlsonComorbidityIndex(
     elif icd_version == "icd9" and implementation in [
         "australia",
         "sweden",
+        "rcs",
         "uk_shmi",
     ]:
         print(f"Warning: Implementation '{implementation}' only uses ICD-10. Setting ICD version to 'icd10'.") # fmt: skip
@@ -86,12 +91,14 @@ def CharlsonComorbidityIndex(
         "quan",
         "deyo",
         "romano",
+        "dhoore",
         "australia",
         "sweden",
+        "rcs",
         "uk_shmi",
     ], (
         "implementation must be one of: "
-        "'quan', 'deyo', 'romano', 'australia', 'sweden', or 'uk_shmi'."
+        "'quan', 'deyo', 'romano', 'dhoore', 'australia', 'sweden', 'rcs', or 'uk_shmi'."
     )
     assert (
         age_col in df.columns
@@ -140,6 +147,8 @@ def CharlsonComorbidityIndex(
         definition_file = "CHARLSON_AUSTRALIA.csv"
     elif implementation == "sweden":
         definition_file = "CHARLSON_SWEDEN.csv"
+    elif implementation == "rcs":
+        definition_file = "CHARLSON_RCS.csv"
     elif implementation == "uk_shmi":
         definition_file = "CHARLSON_UK_SHMI_v1.55.csv"
     else:

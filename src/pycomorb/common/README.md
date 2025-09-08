@@ -12,6 +12,12 @@ References for ICD-9-CM and ICD-10 Coding Algorithms for Charlson Comorbidities:
 5. Romano PS, Roos LL, Jollis JG. Adapting a clinical comorbidity index for use with ICD-9-CM administrative data: differing perspectives. J Clin Epidemiol. 1993 Oct;46(10):1075-9; discussion 1081-90. doi: [10.1016/0895-4356(93)90103-8](https://doi.org/10.1016/0895-4356(93)90103-8). PMID: 8410092.
     - The implementation uses the codes as described in the recent revision in the Romano paper. In the original Romano table, no codes for "Rheumatologic disease" and "AIDS" are given. The mentioned codes for _hypertensive heart  and  renal  disease  with  congestive heart  failure_ are not included, as they were not yet in use by Romano et al.
 6. Quan H, Sundararajan V, Halfon P, Fong A, Burnand B, Luthi JC, Saunders LD, Beck CA, Feasby TE, Ghali WA. Coding algorithms for defining comorbidities in ICD-9-CM and ICD-10 administrative data. Med Care. 2005 Nov;43(11):1130-9. doi: [10.1097/01.mlr.0000182534.19832.83](http://doi.org/10.1097/01.mlr.0000182534.19832.83). PMID: 16224307.
+7. Armitage JN, van der Meulen JH; Royal College of Surgeons Co-morbidity Consensus Group. Identifying co-morbidity in surgical patients using administrative data with the Royal College of Surgeons Charlson Score. Br J Surg. 2010 May;97(5):772-81. doi: [10.1002/bjs.6930](http://doi.org/10.1002/bjs.6930). PMID: 20306528.
+    - `Rheumatic disease` is renamed to `Rheumatological disease`
+    - `Peptic ulcer disease` is not included
+    - Both Liver disease and Diabetes are NOT split into two categories depending on severity / complications
+    - NB: "each disease category is given an equal weight in the RCS Charlson Score, as it was designed to be used as a simple count of co-morbid conditions"
+        - consequently, age is also not included in this implementation (i.e., weight = 0)
 
 The following variants are also added:
 
