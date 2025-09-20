@@ -34,6 +34,7 @@ def comorbidity(
     score_col_name: str = "Custom Comorbidity Score",
     mutual_exclusion_rules: list[tuple[str, str]] = None,
     return_categories: bool = False,
+    fix_dot_in_icd_code: bool = False,
 ):
     """
     Unified wrapper to calculate a comorbidity or frailty score.
@@ -57,6 +58,7 @@ def comorbidity(
         score_col_name (str): Name for the calculated score column (Custom only).
         mutual_exclusion_rules (list of tuple, optional): List of mutually exclusive category pairs (Custom only).
         return_categories (bool): Whether to return category indicators.
+        fix_dot_in_icd_code (bool): Whether to remove dots from ICD codes before processing. Default: False.
 
     Returns:
         - DataFrame with [id_col, score].
@@ -67,6 +69,20 @@ def comorbidity(
     is_pandas = pd and isinstance(df, pd.DataFrame)
     if is_pandas:
         df = pl.from_pandas(df)
+
+    # remove dots from ICD codes if requested
+    if fix_dot_in_icd_code:
+        df = df.with_columns(
+            pl.col(code_col).str.replace(".", "", literal=True)
+        )
+
+    # check that no dots are present in ICD codes (Polars-native)
+    contains_dot = df.select(
+        pl.col(code_col).str.contains(r"\.").any().alias("contains_dot")
+    ).to_dicts()[0]["contains_dot"]
+    assert (
+        not contains_dot
+    ), f"All values in column '{code_col}' must not contain dots ('.'). Consider setting fix_dot_in_icd_code=True."
 
     # apply ICD modification if requested
     if icd_modification is not None and "10" in icd_version:
