@@ -24,3 +24,5 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.package-data]
 "pycomorb.common" = ["*.csv"]
+"pycomorb.modification_DE" = ["*.csv"]
+"pycomorb.modification_US" = ["*.csv"]

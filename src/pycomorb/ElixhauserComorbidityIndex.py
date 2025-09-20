@@ -18,7 +18,6 @@
 
 from pathlib import Path
 
-import pandas as pd
 import polars as pl
 
 # Import the generalized function
@@ -52,11 +51,6 @@ def ElixhauserComorbidityIndex(
         - DataFrame with [id_col, score_col_name].
         - DataFrame with category indicators if return_categories is True, else None.
     """
-
-    # Check if input is pandas DataFrame and convert to polars
-    is_pandas = pd and isinstance(df, pd.DataFrame)
-    if is_pandas:
-        df = pl.from_pandas(df)
 
     # Change ICD to ICD-9 for original Elixhauser and AHRQ ICD-9
     if icd_version == "icd10" and implementation in [
@@ -146,8 +140,5 @@ def ElixhauserComorbidityIndex(
         mutual_exclusion_rules=mutual_exclusion_rules,
         return_categories=return_categories,
     )
-
-    if is_pandas:
-        return df_elixhauser.to_pandas()
 
     return df_elixhauser

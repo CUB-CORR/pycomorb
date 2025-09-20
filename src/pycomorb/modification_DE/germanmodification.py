@@ -3,7 +3,6 @@
 # 3. take only the transfer files (e.g. icd10gm2013syst_umsteiger_2012_2013.txt for 2012->2013) and put them into a separate folder, e.g. data/icd10gm/transfers
 # 4. run this script in that folder
 
-import os
 import polars as pl
 
 files = [

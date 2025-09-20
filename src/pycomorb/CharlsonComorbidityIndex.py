@@ -28,7 +28,6 @@
 
 from pathlib import Path
 
-import pandas as pd
 import polars as pl
 
 # Import the generalized function
@@ -62,11 +61,6 @@ def CharlsonComorbidityIndex(
         - DataFrame with [id_col, "Charlson Score"].
         - DataFrame with category indicators if return_categories is True, else None.
     """
-
-    # Check if input is pandas DataFrame and convert to polars
-    is_pandas = pd and isinstance(df, pd.DataFrame)
-    if is_pandas:
-        df = pl.from_pandas(df)
 
     # Change ICD to ICD-9 for Deyo, D'Hoore and Romano
     if icd_version == "icd10" and implementation in [
@@ -209,9 +203,6 @@ def CharlsonComorbidityIndex(
     # Drop Age Score column if not needed
     if not return_categories:
         df_charlson = df_charlson.drop("Age Score")
-
-    if is_pandas:
-        return df_charlson.to_pandas()
 
     return df_charlson
 

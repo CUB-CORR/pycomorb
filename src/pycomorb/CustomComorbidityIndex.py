@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
-import pandas as pd
 import polars as pl
 
 
@@ -36,11 +35,6 @@ def CustomComorbidityIndex(
         - DataFrame with [id_col, score_col_name].
         - DataFrame with category indicators if return_categories is True, else None.
     """
-
-    # Check if input is pandas DataFrame and convert to polars
-    is_pandas = pd and isinstance(df, pd.DataFrame)
-    if is_pandas:
-        df = pl.from_pandas(df)
 
     # Input validation
     assert icd_version in [
@@ -225,8 +219,5 @@ def CustomComorbidityIndex(
     comorbidity_df = df_presence_absence.select(*cols, score_expr).cast(
         {score_col_name: int}
     )
-
-    if is_pandas:
-        comorbidity_df = comorbidity_df.to_pandas()
 
     return comorbidity_df

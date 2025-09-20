@@ -4,12 +4,15 @@ __author__ = """Finn Fassbender"""
 __email__ = "finn.fassbender@charite.de"
 __version__ = "0.5.2"
 
+import pandas as pd
+import polars as pl
+
 from .CharlsonComorbidityIndex import CharlsonComorbidityIndex
+from .CustomComorbidityIndex import CustomComorbidityIndex
 from .ElixhauserComorbidityIndex import ElixhauserComorbidityIndex
 from .GagneComorbidityIndex import GagneComorbidityIndex
-from .CustomComorbidityIndex import CustomComorbidityIndex
 from .HospitalFrailtyRiskScore import HospitalFrailtyRiskScore
-from .ICDModifications import get_icd10gm
+from .ICDModifications import get_icd10cm, get_icd10gm
 
 
 def comorbidity(
@@ -42,7 +45,7 @@ def comorbidity(
         code_col (str): Name of the column containing ICD codes. Default: "code".
         age_col (str): Name of the column containing patient ages (Charlson only). Default: "age".
         year_col (str): Name of the column containing the year of the ICD code (for ICD history modifications). Default: "year".
-        icd_version (str): ICD version. Default: "icd10".
+        icd_version (str): ICD version. Must be one of: 'icd9', 'icd10', or 'icd9_10'. Default: "icd10".
         icd_version_col (str, optional): Name of the column with ICD version for 'icd9_10'. Default: None.
         icd_modification (str, optional): ICD modification to apply ('icd10gm'). Default: None.
         icd_modification_target_year (int): Target year for ICD modification (if applicable). Default: 2004.
@@ -59,18 +62,32 @@ def comorbidity(
         - DataFrame with [id_col, score].
         - DataFrame with category indicators if return_categories is True, else None.
     """
+
+    # Check if input is pandas DataFrame and convert to polars
+    is_pandas = pd and isinstance(df, pd.DataFrame)
+    if is_pandas:
+        df = pl.from_pandas(df)
+
     # apply ICD modification if requested
-    if icd_modification is not None:
-        if icd_modification.lower() == "icd10gm":
+    if icd_modification is not None and "10" in icd_version:
+        if icd_modification.lower() == "icd10cm":
+            df = get_icd10cm(
+                data=df,
+                code_col=code_col,
+                year_col=year_col,
+                target_year=icd_modification_target_year,
+            )
+            code_col = f"icd_{icd_modification_target_year}"
+        elif icd_modification.lower() == "icd10gm":
             df = get_icd10gm(
                 data=df,
                 code_col=code_col,
                 year_col=year_col,
                 target_year=icd_modification_target_year,
             )
-            code_col = f"icd10gm_{icd_modification_target_year}"
+            code_col = f"icd_{icd_modification_target_year}"
         else:
-            raise ValueError(f"Unknown icd_modification: '{icd_modification}'. Currently, only 'icd10gm' is supported.") # fmt: skip
+            raise ValueError(f"Unknown icd_modification: '{icd_modification}'. Currently, only 'icd10gm' and 'icd10cm' are supported.") # fmt: skip
 
     # calculate scores
     score = score.lower()
@@ -82,7 +99,7 @@ def comorbidity(
     ):
         if age_col not in df.columns:
             raise ValueError(f"Column '{age_col}' (age) must be present in input DataFrame for Charlson calculation.") # fmt: skip
-        return CharlsonComorbidityIndex(
+        return_df = CharlsonComorbidityIndex(
             df=df,
             id_col=id_col,
             code_col=code_col,
@@ -98,7 +115,7 @@ def comorbidity(
         "elixhausercomorbidityindex",
         "elixhauser_comorbidity_index",
     ):
-        return ElixhauserComorbidityIndex(
+        return_df = ElixhauserComorbidityIndex(
             df=df,
             id_col=id_col,
             code_col=code_col,
@@ -117,7 +134,7 @@ def comorbidity(
         "combinedcomorbidityindex",
         "combined_comorbidity_index",
     ):
-        return GagneComorbidityIndex(
+        return_df = GagneComorbidityIndex(
             df=df,
             id_col=id_col,
             code_col=code_col,
@@ -131,7 +148,7 @@ def comorbidity(
         "hospitalfrailtyriskscore",
         "hospital_frailty_risk_score",
     ):
-        return HospitalFrailtyRiskScore(
+        return_df = HospitalFrailtyRiskScore(
             df=df,
             id_col=id_col,
             code_col=code_col,
@@ -143,7 +160,7 @@ def comorbidity(
         "customcomorbidityindex",
         "custom_comorbidity_index",
     ):
-        return CustomComorbidityIndex(
+        return_df = CustomComorbidityIndex(
             df=df,
             id_col=id_col,
             code_col=code_col,
@@ -160,3 +177,8 @@ def comorbidity(
             f"Unknown score: '{score}'. Must be one of: "
             "'charlson', 'elixhauser', 'gagne', 'hfrs' or 'custom'."
         )
+
+    if is_pandas:
+        return return_df.to_pandas()
+
+    return return_df
