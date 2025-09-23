@@ -83,6 +83,11 @@ def comorbidity(
     assert (
         not contains_dot
     ), f"All values in column '{code_col}' must not contain dots ('.'). Consider setting fix_dot_in_icd_code=True."
+    
+    # strip whitespace from ICD codes, and make uppercase
+    df = df.with_columns(
+        pl.col(code_col).str.strip_chars().str.to_uppercase()
+    )
 
     # apply ICD modification if requested
     if icd_modification is not None and "10" in icd_version:
