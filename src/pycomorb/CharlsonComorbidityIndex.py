@@ -44,22 +44,24 @@ def CharlsonComorbidityIndex(
     implementation: str = "quan",
     return_categories: bool = False,
 ):
-    """
-    Calculate the Charlson Comorbidity Index (CCI) using ICD codes and age.
+    """Calculate the Charlson Comorbidity Index (CCI) using ICD codes and age.
 
     Args:
-        df (pl.DataFrame): DataFrame with at least columns [id_col, code_col, age_col].
-        id_col (str): Name of the column containing unique identifier. Default: "id".
-        code_col (str): Name of the column containing ICD codes. Default: "code".
-        age_col (str): Name of the column containing patient ages. Default: "age".
-        icd_version (str): ICD version ('icd9', 'icd10', or 'icd9_10'). Default: "icd10".
-        icd_version_col (str, optional): Name of the column with ICD version for 'icd9_10'. Default: None.
-        implementation (str): CCI implementation ('quan', 'deyo', 'romano', 'australia', 'sweden', 'rcs', 'uk_shmi'). Default: "quan".
-        return_categories (bool): If True, also return presence indicators for each CCI category.
+        df (pl.DataFrame): Input data containing at least ``id_col``, ``code_col``, and ``age_col``.
+        id_col (str, optional): Column name containing unique identifiers. Defaults to ``"id"``.
+        code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
+        age_col (str, optional): Column name containing patient ages. Defaults to ``"age"``.
+        icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd10"``.
+        icd_version_col (str, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``. Defaults to ``None``.
+        implementation (str, optional): Definition set to use; ``"quan"``, ``"deyo"``, ``"romano"``, ``"dhoore"``, ``"australia"``, ``"sweden"``, ``"rcs"``, or ``"uk_shmi"``. Defaults to ``"quan"``.
+        return_categories (bool, optional): If ``True``, includes indicator columns for each CCI category. Defaults to ``False``.
 
     Returns:
-        - DataFrame with [id_col, "Charlson Score"].
-        - DataFrame with category indicators if return_categories is True, else None.
+        pl.DataFrame: DataFrame containing ``id_col``, the ``"Charlson Score"`` column, and, when ``return_categories`` is ``True``, category indicators and the ``"Age Score"`` column.
+
+    Raises:
+        AssertionError: If required columns are missing.
+        ValueError: If ``implementation`` is unsupported.
     """
 
     # Change ICD to ICD-9 for Deyo, D'Hoore and Romano
@@ -218,21 +220,23 @@ def CharlsonComorbidity_10year_survival(
     implementation: str = "quan",
     precalculated_df: bool = False,
 ) -> pl.DataFrame:
-    """
-    Calculate the 10-year survival probability based on the Charlson Comorbidity Index.
+    """Estimate 10-year survival probabilities from the Charlson Comorbidity Index.
 
     Args:
-        df (pl.DataFrame): DataFrame with at least columns [id_col, code_col, age_col] or [id_col, "Charlson Score"] if precalculated_df is True.
-        id_col (str): Name of the column containing unique identifier. Default: "id".
-        code_col (str): Name of the column containing ICD codes. Default: "code".
-        age_col (str): Name of the column containing patient ages. Default: "age".
-        icd_version (str): ICD version ('icd9', 'icd10', or 'icd9_10'). Default: "icd10".
-        icd_version_col (str, optional): Name of the column with ICD version for 'icd9_10'. Default: None.
-        implementation (str): The Charlson implementation. Default: "quan".
-        precalculated_df (bool): If True, df is expected to contain a "Charlson Score" column instead of ICD codes and age.
+        df (pl.DataFrame | None, optional): Source data with ICD codes, ages, and identifiers, or a precomputed Charlson score table when ``precalculated_df`` is ``True``.
+        id_col (str, optional): Column name containing unique identifiers. Defaults to ``"id"``.
+        code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
+        age_col (str, optional): Column name containing patient ages. Defaults to ``"age"``.
+        icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd10"``.
+        icd_version_col (str | None, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``.
+        implementation (str, optional): Charlson definition set passed to :func:`CharlsonComorbidityIndex`. Defaults to ``"quan"``.
+        precalculated_df (bool, optional): If ``True``, assumes ``df`` already includes a ``"Charlson Score"`` column. Defaults to ``False``.
 
     Returns:
-        pl.DataFrame: DataFrame with columns [id_col, "10-year survival probability"].
+        pl.DataFrame: DataFrame with two columns: ``id_col`` and ``"10-year survival probability"``.
+
+    Raises:
+        AssertionError: If required columns are missing when ``precalculated_df`` is ``True``.
     """
 
     if not precalculated_df:

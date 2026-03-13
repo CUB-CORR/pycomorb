@@ -34,22 +34,24 @@ def ElixhauserComorbidityIndex(
     weights: str = "van_walraven",
     return_categories=False,
 ):
-    """
-    Calculate the Elixhauser Comorbidity Index (ECI) using ICD codes.
+    """Calculate the Elixhauser Comorbidity Index (ECI) using ICD codes.
 
     Args:
-        df (pl.DataFrame): DataFrame with at least columns [id_col, code_col].
-        id_col (str): Name of the column containing unique identifier. Default: "id".
-        code_col (str): Name of the column containing ICD codes. Default: "code".
-        icd_version (str): ICD version ('icd9', 'icd10', or 'icd9_10'). Default: "icd10".
-        icd_version_col (str, optional): Name of the column with ICD version for 'icd9_10'. Default: None.
-        implementation (str): Coding algorithm ('quan' or 'elixhauser'). Default: "quan".
-        weights (str): Weighting scheme ('van_walraven', 'thompson_30', 'thompson_29', 'ahrq'). Default: "van_walraven".
-        return_categories (bool): If True, also return presence indicators for each ECI category.
+        df (pl.DataFrame): Input data containing at least ``id_col`` and ``code_col``.
+        id_col (str, optional): Column name containing unique identifiers. Defaults to ``"id"``.
+        code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
+        icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd10"``.
+        icd_version_col (str, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``. Defaults to ``None``.
+        implementation (str, optional): Definition set to use; ``"quan"`` or ``"elixhauser"``. Defaults to ``"quan"``.
+        weights (str, optional): Weighting scheme; one of ``"van_walraven"``, ``"thompson_30"``, ``"thompson_29"``, or ``"ahrq"``. Defaults to ``"van_walraven"``.
+        return_categories (bool, optional): If ``True``, includes indicator columns for each Elixhauser category. Defaults to ``False``.
 
     Returns:
-        - DataFrame with [id_col, score_col_name].
-        - DataFrame with category indicators if return_categories is True, else None.
+        pl.DataFrame: DataFrame containing ``id_col``, the calculated score column, and, when ``return_categories`` is ``True``, category indicators.
+
+    Raises:
+        AssertionError: If ``implementation`` or ``weights`` is outside the supported values.
+        ValueError: If an unsupported ``implementation`` or ``weights`` argument passes validation safeguards.
     """
 
     # Change ICD to ICD-9 for original Elixhauser and AHRQ ICD-9

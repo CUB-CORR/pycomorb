@@ -16,18 +16,20 @@ def get_icdmodification(
     year_col="year",
     target_year=2024,
 ) -> pl.DataFrame:
-    """
-    Map ICD codes to the target year using official transfer files.
+    """Map ICD codes to a target year using official transfer files.
 
     Args:
-        data (pl.DataFrame): Input DataFrame with at least columns [code_col, year_col].
-        transfer_file_path (str): Path to the CSV file containing the transfer mappings.
-        code_col (str): Name of the column containing ICD codes. Default: "code".
-        year_col (str): Name of the column containing the year of the ICD code. Default: "year".
-        target_year (int): Target year for ICD codes (e.g., 2024). Default: 2024.
+        data (pl.DataFrame): Input data containing at least ``code_col`` and ``year_col``.
+        transfer_file_path (str | Path): Path to a CSV file with ICD transfer mappings.
+        code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
+        year_col (str, optional): Column name containing the year of each ICD code. Defaults to ``"year"``.
+        target_year (int, optional): Target year for the mapped ICD codes. Defaults to ``2024``.
 
     Returns:
-        pl.DataFrame: DataFrame with original columns plus a new column 'icdmod_{target_year}' with mapped codes.
+        pl.DataFrame: Input DataFrame with an additional ``f"icd_{target_year}"`` column containing mapped codes.
+
+    Raises:
+        AssertionError: If required columns are missing or ICD codes do not match the expected format.
     """
 
     assert (
@@ -67,17 +69,19 @@ def get_icdmodification(
 def get_icd10gm(
     data: pl.DataFrame, code_col="code", year_col="year", target_year=2024
 ) -> pl.DataFrame:
-    """
-    Map ICD-10-GM codes to the target year using official transfer files.
+    """Map ICD-10-GM codes to a target year using official transfer files.
 
     Args:
-        data (pl.DataFrame): Input DataFrame with at least columns [code_col, year_col].
-        code_col (str): Name of the column containing ICD codes. Default: "code".
-        year_col (str): Name of the column containing the year of the ICD code. Default: "year".
-        target_year (int): Target year for ICD-10-GM codes (e.g., 2024). Default: 2024.
+        data (pl.DataFrame): Input data containing at least ``code_col`` and ``year_col``.
+        code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
+        year_col (str, optional): Column name containing the year of each ICD code. Defaults to ``"year"``.
+        target_year (int, optional): Target ICD-10-GM year. Defaults to ``2024``.
 
     Returns:
-        pl.DataFrame: DataFrame with original columns plus a new column 'icd10gm_{target_year}' with mapped codes.
+        pl.DataFrame: Input DataFrame with an additional ``f"icd_{target_year}"`` column containing mapped ICD-10-GM codes.
+
+    Raises:
+        AssertionError: If ``target_year`` is outside the supported range or required columns are missing.
     """
 
     assert target_year in range(
@@ -99,17 +103,19 @@ def get_icd10gm(
 def get_icd10cm(
     data: pl.DataFrame, code_col="code", year_col="year", target_year=2024
 ) -> pl.DataFrame:
-    """
-    Map ICD-10-CM codes to the target year using official transfer files.
+    """Map ICD-10-CM codes to a target year using official transfer files.
 
     Args:
-        data (pl.DataFrame): Input DataFrame with at least columns [code_col, year_col].
-        code_col (str): Name of the column containing ICD codes. Default: "code".
-        year_col (str): Name of the column containing the year of the ICD code. Default: "year".
-        target_year (int): Target year for ICD-10-CM codes (e.g., 2024). Default: 2024.
+        data (pl.DataFrame): Input data containing at least ``code_col`` and ``year_col``.
+        code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
+        year_col (str, optional): Column name containing the year of each ICD code. Defaults to ``"year"``.
+        target_year (int, optional): Target ICD-10-CM year. Defaults to ``2024``.
 
     Returns:
-        pl.DataFrame: DataFrame with original columns plus a new column 'icd10gm_{target_year}' with mapped codes.
+        pl.DataFrame: Input DataFrame with an additional ``f"icd_{target_year}"`` column containing mapped ICD-10-CM codes.
+
+    Raises:
+        AssertionError: If ``target_year`` is outside the supported range or required columns are missing.
     """
 
     assert target_year in range(

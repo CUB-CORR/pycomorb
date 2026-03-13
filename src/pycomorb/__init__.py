@@ -36,33 +36,65 @@ def comorbidity(
     return_categories: bool = False,
     fix_dot_in_icd_code: bool = False,
 ):
-    """
-    Unified wrapper to calculate a comorbidity or frailty score.
+    """Calculate a comorbidity or frailty score from ICD-coded data.
 
     Args:
-        score (str): Which score to calculate.
-        df (pl.DataFrame): DataFrame with at least columns [id_col, code_col] (and age_col for Charlson).
-        id_col (str): Name of the column containing unique identifier. Default: "id".
-        code_col (str): Name of the column containing ICD codes. Default: "code".
-        age_col (str): Name of the column containing patient ages (Charlson only). Default: "age".
-        year_col (str): Name of the column containing the year of the ICD code (for ICD history modifications). Default: "year".
-        icd_version (str): ICD version. Must be one of: 'icd9', 'icd10', or 'icd9_10'. Default: "icd10".
-        icd_version_col (str, optional): Name of the column with ICD version for 'icd9_10'. Default: None.
-        icd_modification (str, optional): ICD modification to apply ('icd10gm'). Default: None.
-        icd_modification_target_year (int): Target year for ICD modification (if applicable). Default: 2004.
-        implementation (str, optional): Implementation variant (see individual index docs).
-        weights (str, optional): Weighting scheme (Elixhauser only).
-        definition_data (DataFrame, optional): DataFrame with ICD definitions and weights (Custom only).
-        definition_file_path (str, optional): Path to CSV with ICD definitions and weights (Custom only).
-        weight_col_name (str): Name of the column with weights in definition_data (Custom only).
-        score_col_name (str): Name for the calculated score column (Custom only).
-        mutual_exclusion_rules (list of tuple, optional): List of mutually exclusive category pairs (Custom only).
-        return_categories (bool): Whether to return category indicators.
-        fix_dot_in_icd_code (bool): Whether to remove dots from ICD codes before processing. Default: False.
+        score (str): Name of the score to calculate. Supported values are ``"charlson"``, ``"elixhauser"``, ``"gagne"``, ``"hfrs"``, and ``"custom"`` (case-insensitive and including common aliases such as ``"cci"`` or ``"eci"``).
+        df (pl.DataFrame | pandas.DataFrame): Input data containing at least ``id_col`` and ``code_col``. Additional columns such as ``age_col`` or ``year_col`` are required depending on the chosen score.
+        id_col (str, optional): Column name containing unique identifiers. Defaults to ``"id"``.
+        code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
+        age_col (str, optional): Column name containing patient ages (required for Charlson calculations). Defaults to ``"age"``.
+        year_col (str, optional): Column name containing the year of the ICD code (used when applying ICD modification transfer files). Defaults to ``"year"``.
+        icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd10"``.
+        icd_version_col (str, optional): Column name with ICD version labels (required for ``"icd9_10"`` inputs). Defaults to ``None``.
+        icd_modification (str, optional): ICD modification to apply (``"icd10gm"`` or ``"icd10cm"``). When provided, codes are mapped to the ``icd_modification_target_year``. Defaults to ``None``.
+        icd_modification_target_year (int, optional): Target year for ICD modification mappings. Defaults to ``2004``.
+        implementation (str, optional): Implementation variant for the selected score (for example ``"quan"``, ``"deyo"``, ``"elixhauser"``). Defaults to ``None``.
+        weights (str, optional): Weighting scheme for the Elixhauser index. Defaults to ``None``.
+        definition_data (pl.DataFrame | pandas.DataFrame | Path | str, optional): Definition table for custom indices, either as a DataFrame or a path to a CSV file. Defaults to ``None``.
+        definition_file_path (str, optional): Path to a CSV containing custom index definitions. Ignored when ``definition_data`` is a DataFrame. Defaults to ``None``.
+        weight_col_name (str, optional): Column name with weights in ``definition_data``. Defaults to ``"weights"``.
+        score_col_name (str, optional): Column name assigned to the calculated score for custom indices. Defaults to ``"Custom Comorbidity Score"``.
+        mutual_exclusion_rules (list[tuple[str, str]], optional): Mutually exclusive category pairs for custom indices, where the second entry is suppressed when the first is present. Defaults to ``None``.
+        return_categories (bool, optional): If ``True``, includes category indicator columns in the result. Defaults to ``False``.
+        fix_dot_in_icd_code (bool, optional): If ``True``, removes dots from ICD codes prior to processing. Defaults to ``False``.
 
     Returns:
-        - DataFrame with [id_col, score].
-        - DataFrame with category indicators if return_categories is True, else None.
+        pl.DataFrame | pandas.DataFrame: DataFrame containing the calculated score and, when ``return_categories`` is ``True``, the category indicators. If the input was a pandas DataFrame, the output matches that type.
+
+    Raises:
+        AssertionError: If ICD codes contain dots when ``fix_dot_in_icd_code`` is ``False``.
+        ValueError: If the requested ``score`` or ``icd_modification`` is not supported, or required columns are missing.
+
+    Example:
+        Compute a Charlson score with category indicators and automatic ICD-10-GM harmonization:
+
+        >>> import polars as pl
+        >>> from pycomorb import comorbidity
+        >>> diagnoses = pl.DataFrame(
+        ...     {
+        ...         "id": [1, 1, 2],
+        ...         "code": ["I21", "E119", "C349"],
+        ...         "age": [66, 66, 81],
+        ...         "year": [2012, 2012, 2010],
+        ...     }
+        ... )
+        >>> comorbidity(
+        ...     score="charlson",
+        ...     df=diagnoses,
+        ...     icd_version="icd10",
+        ...     icd_modification="icd10gm",
+        ...     return_categories=True,
+        ... )
+        shape: (2, 22)
+        ┌─────┬───────────────────────┬──────────────────────────┬───┬───────────┬────────────────┐
+        │ id  ┆ Myocardial infarction ┆ Congestive heart failure ┆ … ┆ Age Score ┆ Charlson Score │
+        │ --- ┆ ---                   ┆ ---                      ┆   ┆ ---       ┆ ---            │
+        │ i64 ┆ i32                   ┆ i32                      ┆   ┆ i64       ┆ i64            │
+        ╞═════╪═══════════════════════╪══════════════════════════╪═══╪═══════════╪════════════════╡
+        │ 1   ┆ 1                     ┆ 0                        ┆ … ┆ 1         ┆ 3              │
+        │ 2   ┆ 0                     ┆ 0                        ┆ … ┆ 2         ┆ 4              │
+        └─────┴───────────────────────┴──────────────────────────┴───┴───────────┴────────────────┘
     """
 
     # Check if input is pandas DataFrame and convert to polars

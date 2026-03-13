@@ -37,20 +37,22 @@ def GagneComorbidityIndex(
     return_categories=False,
     gagne_name: bool = False,
 ):
-    """
-    Calculate the Gagne Comorbidity Index using ICD codes.
+    """Calculate the Gagne Comorbidity Index using ICD codes.
 
     Args:
-        df (pl.DataFrame): DataFrame with at least columns [id_col, code_col].
-        id_col (str): Name of the column containing unique identifier. Default: "id".
-        code_col (str): Name of the column containing ICD codes. Default: "code".
-        icd_version (str): ICD version ('icd9', 'icd10', or 'icd9_10'). Default: "icd9".
-        icd_version_col (str, optional): Name of the column with ICD version for 'icd9_10'. Default: None.
-        return_categories (bool): If True, also return presence indicators for each Gagne category.
+        df (pl.DataFrame): Input data containing at least ``id_col`` and ``code_col``.
+        id_col (str, optional): Column name containing unique identifiers. Defaults to ``"id"``.
+        code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
+        icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd9"``.
+        icd_version_col (str, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``. Defaults to ``None``.
+        return_categories (bool, optional): If ``True``, includes indicator columns for each Gagne category. Defaults to ``False``.
+        gagne_name (bool, optional): If ``True``, name the score column ``"Gagne Score"``; otherwise use ``"Combined Comorbidity Score"``. Defaults to ``False``.
 
     Returns:
-        - DataFrame with [id_col, "Combined Comorbidity Score"].
-        - DataFrame with category indicators if return_categories is True, else None.
+        pl.DataFrame: DataFrame containing ``id_col``, the calculated score column, and, when ``return_categories`` is ``True``, category indicators.
+
+    Raises:
+        AssertionError: If required columns are missing.
     """
 
     assert (

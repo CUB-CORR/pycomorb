@@ -16,24 +16,25 @@ def CustomComorbidityIndex(
     mutual_exclusion_rules: Optional[List[Tuple[str, str]]] = None,
     return_categories=False,
 ):
-    """
-    Generic comorbidity index calculation from ICD codes.
+    """Compute a custom comorbidity score from ICD-coded input data.
 
     Args:
-        df (pl.DataFrame): DataFrame with at least columns [id_col, code_col].
-        id_col (str): Name of the column containing unique identifier. Default: "id".
-        code_col (str): Name of the column containing ICD codes. Default: "code".
-        icd_version (str): ICD version ('icd9', 'icd10', or 'icd9_10'). Default: "icd10".
-        icd_version_col (str, optional): Name of the column with ICD version for 'icd9_10'. Default: None.
-        definition_data (Path or pl.DataFrame): Path to CSV or DataFrame with ICD definitions and weights.
-        weight_col_name (str): Name of the column with weights in definition_data.
-        score_col_name (str): Name for the calculated score column.
-        mutual_exclusion_rules (list of tuple, optional): List of (complicated, uncomplicated) category pairs.
-        return_categories (bool): If True, also return presence indicators for each category.
+        df (pl.DataFrame): Input data containing at least ``id_col`` and ``code_col``.
+        id_col (str, optional): Column name containing unique identifiers. Defaults to ``"id"``.
+        code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
+        icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd10"``.
+        icd_version_col (str, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``. Defaults to ``None``.
+        definition_data (Path | pl.DataFrame, optional): Path to a CSV file or DataFrame containing category definitions and weights. Defaults to ``None``.
+        weight_col_name (str, optional): Column name with weights inside ``definition_data``. Defaults to ``None``.
+        score_col_name (str, optional): Column name assigned to the calculated score in the result. Defaults to ``None``.
+        mutual_exclusion_rules (list[tuple[str, str]], optional): Pairs of mutually exclusive categories where the second entry is suppressed when the first is present. Defaults to ``None``.
+        return_categories (bool, optional): If ``True``, includes indicator columns for each matched category. Defaults to ``False``.
 
     Returns:
-        - DataFrame with [id_col, score_col_name].
-        - DataFrame with category indicators if return_categories is True, else None.
+        pl.DataFrame: DataFrame containing ``id_col``, the calculated score column, and, when ``return_categories`` is ``True``, category indicators.
+
+    Raises:
+        AssertionError: If required columns or definitions are missing, or if ``icd_version`` and ``icd_version_col`` are inconsistent.
     """
 
     # Input validation

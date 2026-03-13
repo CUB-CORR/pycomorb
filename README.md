@@ -23,6 +23,8 @@ See [common/README.md](https://github.com/CUB-CORR/pycomorb/blob/main/src/pycomo
 
 ### Charlson Comorbidity Index
 
+Categories are: `Myocardial infarction`, `Congestive heart failure`, `Peripheral vascular disease`, `Cerebrovascular disease`, `Dementia`, `Chronic pulmonary disease`, `Rheumatic disease`, `Peptic ulcer disease`, `Mild liver disease`, `Diabetes without chronic complication`, `Diabetes with chronic complication`, `Hemiplegia or paraplegia`, `Renal disease`, `Any malignancy, including lymphoma and leukemia, except malignant neoplasm of skin`, `Moderate or severe liver disease`, `Metastatic solid tumor`, `AIDS/HIV`.
+
 - **Mappings**:
   - Quan et al. 2005 ([Quan 2005](https://doi.org/10.1097/01.mlr.0000182534.19832.83))
   - Deyo et al. 1992 ([Deyo 1992](https://doi.org/10.1016/0895-4356(92)90133-8))
@@ -38,6 +40,8 @@ See [common/README.md](https://github.com/CUB-CORR/pycomorb/blob/main/src/pycomo
 
 ### Elixhauser Comorbidity Index
 
+Categories are: `Congestive heart failure`, `Cardiac arrhythmias`, `Valvular disease`, `Pulmonary circulation disorders`, `Peripheral vascular disorders`, `Hypertension uncomplicated`, `Hypertension complicated`, `Paralysis`, `Other neurological disorders`, `Chronic pulmonary disease`, `Diabetes uncomplicated`, `Diabetes complicated`, `Hypothyroidism`, `Renal failure`, `Liver disease`, `Peptic ulcer disease excluding bleeding`, `AIDS/HIV`, `Lymphoma`, `Metastatic cancer`, `Solid tumor without metastasis`, `Rheumatoid arthritis/collagen vascular diseases`, `Coagulopathy`, `Obesity`, `Weight loss`, `Fluid and electrolyte disorders`, `Blood loss anemia`, `Deficiency anemia`, `Alcohol abuse`, `Drug abuse`, `Psychoses`, `Depression`.
+
 - **Mappings**:
   - Quan et al. 2005 ([Quan 2005](https://doi.org/10.1097/01.mlr.0000182534.19832.83))
   - Original Elixhauser et al. 1998 (ICD-9) ([Elixhauser 1998](https://doi.org/10.1097/00005650-199801000-00004))
@@ -47,6 +51,8 @@ See [common/README.md](https://github.com/CUB-CORR/pycomorb/blob/main/src/pycomo
   - AHRQ (Moore et al. 2017, [AHRQ Comorbidity Software](https://hcup-us.ahrq.gov/toolssoftware/comorbidityicd10/comorbidity_icd10.jsp))
 
 ### Combined Comorbidity Score
+
+Categories are: `Alcohol abuse`, `Any tumor`, `Cardiac arrhythmias`, `Chronic pulmonary disease`, `Coagulopathy`, `Complicated diabetes`, `Congestive heart failure`, `Deficiency anemia`, `Dementia`, `Fluid and electrolyte disorders`, `Hemiplegia`, `HIV/AIDS`, `Hypertension`, `Liver disease`, `Metastatic cancer`, `Peripheral vascular disease`, `Psychosis`, `Pulmonary circulation disorders`, `Renal failure`, `Weight loss`.
 
 - Gagne et al. 2011 ([Gagne 2011](https://doi.org/10.1016/j.jclinepi.2010.10.004)), with ICD-9 and ICD-10 support ([Sun 2017](https://doi.org/10.1097/MLR.0000000000000824))
 

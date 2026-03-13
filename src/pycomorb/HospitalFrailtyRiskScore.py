@@ -20,19 +20,20 @@ def HospitalFrailtyRiskScore(
     icd_version: str = "icd10",
     return_categories=False,
 ):
-    """
-    Calculate the Hospital Frailty Risk Score (HFRS) using ICD-10 codes.
+    """Calculate the Hospital Frailty Risk Score (HFRS) using ICD-10 codes.
 
     Args:
-        df (pl.DataFrame): DataFrame with at least columns [id_col, code_col].
-        id_col (str): Name of the column containing unique identifier. Default: "id".
-        code_col (str): Name of the column containing ICD codes. Default: "code".
-        icd_version (str): ICD version ('icd10'). HFRS requires ICD-10. Default: "icd10".
-        return_categories (bool): If True, also return presence indicators for each HFRS category.
+        df (pl.DataFrame | pd.DataFrame): Input data containing at least ``id_col`` and ``code_col``.
+        id_col (str, optional): Column name containing unique identifiers. Defaults to ``"id"``.
+        code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
+        icd_version (str, optional): ICD version; must be ``"icd10"``. Defaults to ``"icd10"``.
+        return_categories (bool, optional): If ``True``, includes indicator columns for each HFRS category. Defaults to ``False``.
 
     Returns:
-        - DataFrame with [id_col, "HFRS Score"].
-        - DataFrame with category indicators if return_categories is True, else None.
+        pl.DataFrame | pd.DataFrame: DataFrame containing ``id_col``, the ``"HFRS Score"`` column, and, when ``return_categories`` is ``True``, category indicators.
+
+    Raises:
+        AssertionError: If ``icd_version`` is not ``"icd10"`` or required columns are missing.
     """
 
     # Check if input is pandas DataFrame and convert to polars
