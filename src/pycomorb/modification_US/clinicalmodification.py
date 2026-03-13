@@ -6,7 +6,7 @@ import re
 
 import polars as pl
 
-INPUT_FILE = "508-compliant-version-ICD_10_CM_CONVERSION_TABLE_FY2026.txt"
+INPUT_FILE = "508-Version-ICD-10-CM-CONVERSION-TABLE-FY2026-April 1 2026.csv"
 OUTPUT_FILE = "icd10cm.csv"
 START_YEAR = 15  # 2015 as 16
 END_YEAR = 26  # 2026 as 26
@@ -64,7 +64,7 @@ def clean_column(col: pl.Expr, year: int = None):
 # Read as TSV, skip first two lines, use third as header
 df = pl.read_csv(
     INPUT_FILE,
-    separator="\t",
+    separator=",",
     skip_rows=2,
     has_header=True,
     new_columns=["current_code", "effective", "previous_codes"],
