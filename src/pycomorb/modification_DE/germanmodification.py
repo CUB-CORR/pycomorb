@@ -83,4 +83,7 @@ for year in reversed(years):
         .alias(str(year))
     )
 
+# Sort codes for consistency when updating
+df = df.sort(str(year) for year in years)
+
 df.write_csv("icd10gm.csv")

@@ -54,7 +54,8 @@ def split_codes(codes):
 
 def clean_column(col: pl.Expr, year: int = None):
     return (
-        col.str.replace_all(r"\.", "")
+        col.fill_null("NONE")
+        .str.replace_all(r"\.", "")
         .str.to_uppercase()
         .replace("NONE", f"UNDEF{year}")
     )
@@ -147,6 +148,8 @@ for y in reversed(year_cols[:-1]):
     )
     .filter(pl.col("n_unique") > 1)
     .drop("n_unique")
+    # Sort codes for consistency when updating
+    .sort(year_cols)
     # Write to CSV (years as columns, no code column, just years)
     .write_csv(OUTPUT_FILE)
 )
