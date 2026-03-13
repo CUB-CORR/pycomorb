@@ -27,8 +27,9 @@ files = [
     "icd10gm2023syst_umsteiger_2022_2023_20221206.txt",  # 2022->2023
     "icd10gm2024syst_umsteiger_2023_20221206_2024.txt",  # 2023->2024
     "icd10gm2025syst_umsteiger_2024_2025.txt",  # 2024->2025
+    "icd10gm2026syst_umsteiger_2025_2026_20251111.txt",  # 2025->2026
 ]
-years = range(2004, 2025)
+years = range(2004, 2026)
 
 df = None
 for year, file in zip(years, files):
