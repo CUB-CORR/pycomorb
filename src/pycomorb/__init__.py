@@ -1,8 +1,8 @@
 """Top-level package for comorbidipy."""
 
-__author__ = """Finn Fassbender"""
+__author__ = """Finn S. Fassbender"""
 __email__ = "finn.fassbender@charite.de"
-__version__ = "0.6"
+__version__ = "v1.20260401.0"
 
 import pandas as pd
 import polars as pl
