@@ -43,7 +43,7 @@ def ElixhauserComorbidityIndex(
         icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd10"``.
         icd_version_col (str, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``. Defaults to ``None``.
         implementation (str, optional): Definition set to use; ``"quan"`` or ``"elixhauser"``. Defaults to ``"quan"``.
-        weights (str, optional): Weighting scheme; one of ``"van_walraven"``, ``"thompson_30"``, ``"thompson_29"``, or ``"ahrq"``. Defaults to ``"van_walraven"``.
+        weights (str, optional): Weighting scheme; one of ``"van_walraven"``, ``"thompson_30"``, ``"thompson_29"``, ``"ahrq"``, or ``"swiss"``. Defaults to ``"van_walraven"``.
         return_categories (bool, optional): If ``True``, includes indicator columns for each Elixhauser category. Defaults to ``False``.
 
     Returns:
@@ -76,7 +76,8 @@ def ElixhauserComorbidityIndex(
         "thompson_30",
         "thompson_29",
         "ahrq",
-    ], "weights must be one of: 'van_walraven', 'thompson_30', 'thompson_29', or 'ahrq'."
+        "swiss",
+    ], "weights must be one of: 'van_walraven', 'thompson_30', 'thompson_29', 'ahrq', or 'swiss'."
 
     # Determine definition file based on implementation
     if implementation == "quan":
@@ -100,6 +101,9 @@ def ElixhauserComorbidityIndex(
     elif weights == "ahrq":
         weight_col_name = "AHRQ_weights"
         score_col_name = "Elixhauser AHRQ Score"
+    elif weights == "swiss":
+        weight_col_name = "swiss_weights"
+        score_col_name = "Elixhauser Swiss Score"
     else:
         # Should be caught by assert earlier, but as a safeguard
         raise ValueError(f"Unsupported weights scheme: {weights}")

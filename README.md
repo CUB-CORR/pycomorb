@@ -49,6 +49,7 @@ Categories are: `Congestive heart failure`, `Cardiac arrhythmias`, `Valvular dis
   - van Walraven et al. 2009 ([van Walraven 2009](https://doi.org/10.1097/MLR.0b013e31819432e5))
   - Thompson et al. 2015 ([Thompson 2015](https://doi.org/10.1097/MLR.0000000000000326))
   - AHRQ (Moore et al. 2017, [AHRQ Comorbidity Software](https://hcup-us.ahrq.gov/toolssoftware/comorbidityicd10/comorbidity_icd10.jsp))
+  - Swiss (Sharma et al. 2021, [Sharma 2021](https://doi.org/10.1186/s12913-020-05999-5))
 
 ### Combined Comorbidity Score
 
