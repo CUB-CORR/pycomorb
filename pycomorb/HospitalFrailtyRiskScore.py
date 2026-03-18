@@ -55,7 +55,7 @@ def HospitalFrailtyRiskScore(
 
     # Load definitions
     definition_file = "HFRS.csv"
-    definition_file_path = Path(__file__).parent / f"common/{definition_file}"
+    definition_file_path = Path(__file__).parent / "common" / definition_file
     definitions = pl.read_csv(definition_file_path, separator=",")
 
     assert (

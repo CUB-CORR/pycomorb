@@ -2,7 +2,6 @@
 
 __author__ = """Finn S. Fassbender"""
 __email__ = "finn.fassbender@charite.de"
-__version__ = "v1.20260401.0"
 
 import pandas as pd
 import polars as pl

@@ -151,7 +151,7 @@ def CharlsonComorbidityIndex(
         # Should be caught by assert earlier
         raise ValueError(f"Unsupported implementation: {implementation}")
 
-    definition_file_path = Path(__file__).parent / f"common/{definition_file}"
+    definition_file_path = Path(__file__).parent / "common" / definition_file
     weight_col_name = "weights"
 
     # Use a temporary score name before adding age score

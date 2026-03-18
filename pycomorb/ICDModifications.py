@@ -89,7 +89,7 @@ def get_icd10gm(
     ), "Target year must be between 2004 and 2025."
 
     # Load all transfer files into a dictionary of DataFrames
-    transfer_file_path = Path(__file__).parent / "modification_DE/icd10gm.csv" # fmt: skip
+    transfer_file_path = Path(__file__).parent / "common/modification_DE/icd10gm.csv" # fmt: skip
 
     return get_icdmodification(
         data=data,
@@ -123,7 +123,7 @@ def get_icd10cm(
     ), "Target year must be between 2004 and 2025."
 
     # Load all transfer files into a dictionary of DataFrames
-    transfer_file_path = Path(__file__).parent / "modification_US/icd10cm.csv" # fmt: skip
+    transfer_file_path = Path(__file__).parent / "common/modification_US/icd10cm.csv" # fmt: skip
 
     return get_icdmodification(
         data=data,

@@ -6,7 +6,7 @@
 #
 # Reference for source ICD-9-CM Coding Algorithms:
 # 2. Romano PS, Roos LL, Jollis JG.
-#    Adapting a clinical comorbidity index for use with ICD-9-CM administrative data: differing perspectives.
+#    Adapting a clinical comorbidity index for use with ICD-9-CM administrative databases.
 #    J Clin Epidemiol. 1993 Oct;46(10):1075-9; discussion 1081-90.
 #    doi: 10.1016/0895-4356(93)90103-8. PMID: 8410092.
 # 3. Quan H, Sundararajan V, Halfon P, Fong A, Burnand B, Luthi JC, Saunders LD, Beck CA, Feasby TE, Ghali WA.
@@ -63,7 +63,7 @@ def GagneComorbidityIndex(
     ), f"Column '{code_col}' (ICD code) must be present in input DataFrame."
 
     definition_file = "GAGNE.csv"
-    definition_file_path = Path(__file__).parent / f"common/{definition_file}"
+    definition_file_path = Path(__file__).parent / "common" / definition_file
     weight_col_name = "weights"
     score_col_name = "Gagne Score" if gagne_name else "Combined Comorbidity Score"
 

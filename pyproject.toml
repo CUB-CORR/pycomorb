@@ -1,6 +1,6 @@
 [project]
 name = "pycomorb"
-version = "v1.20260401.0"
+dynamic = ["version"]
 authors = [
   { name="Finn S. Fassbender", email="finn.fassbender@charite.de" },
 ]
@@ -19,10 +19,15 @@ license = "MIT"
 license-files = ["LICEN[CS]E*"]
 
 [build-system]
-requires = ["setuptools >= 77.0.3"]
-build-backend = "setuptools.build_meta"
+requires = ["setuptools>=61", "setuptools-scm>=8"]
+build-backend = "_build_backend"
+backend-path = ["."]
+
+[tool.setuptools]
+packages = ["pycomorb"]
 
 [tool.setuptools.package-data]
-"pycomorb.common" = ["*.csv"]
-"pycomorb.modification_DE" = ["*.csv"]
-"pycomorb.modification_US" = ["*.csv"]
+pycomorb = ["common/**/*.csv"]
+
+[tool.setuptools_scm]
+version_file = "pycomorb/_version.py"

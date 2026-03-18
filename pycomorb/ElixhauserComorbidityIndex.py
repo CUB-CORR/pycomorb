@@ -109,7 +109,7 @@ def ElixhauserComorbidityIndex(
         raise ValueError(f"Unsupported weights scheme: {weights}")
 
     # Load definition and weight files
-    base_path = Path(__file__).parent / "common/"
+    base_path = Path(__file__).parent / "common"
     definition_file_path = base_path / definition_file
     weights_file_path = base_path / "ELIXHAUSER_WEIGHTS.csv"
 
