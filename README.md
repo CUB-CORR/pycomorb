@@ -34,7 +34,7 @@ Categories are: `Myocardial infarction`, `Congestive heart failure`, `Peripheral
   - UK SHMI (NHS Digital, v1.55)
 - **Weights**:
   - Charlson et al. 1987 ([Charlson 1987](https://doi.org/10.1016/0021-9681(87)90171-8))
-  - Quan et al. 2011 ([Quan 2011](https://doi.org/10.1097/MLR.0b013e31821c2e56))
+  - Quan et al. 2011 ([Quan 2011](https://doi.org/10.1093/aje/kwq433))
   - SHMI (NHS Digital, v1.55)
   - Modified SHMI (NHS Digital, v1.55)
 

@@ -157,6 +157,9 @@ def CharlsonComorbidityIndex(
         raise ValueError(f"Unsupported implementation: {implementation}")
 
     # Determine weight column and score column names based on weights argument
+    if weights == "quan":
+        weight_col_name = "quan_weights"
+        score_col_name = "Charlson Quan Score"
     if implementation == "rcs":
         weight_col_name = "rcs_weights"
         score_col_name = "Charlson RCS Score"
