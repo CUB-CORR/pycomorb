@@ -55,13 +55,6 @@ def GagneComorbidityIndex(
         AssertionError: If required columns are missing.
     """
 
-    assert (
-        id_col in df.columns
-    ), f"Column '{id_col}' (ID) must be present in input DataFrame."
-    assert (
-        code_col in df.columns
-    ), f"Column '{code_col}' (ICD code) must be present in input DataFrame."
-
     definition_file = "GAGNE.csv"
     definition_file_path = Path(__file__).parent / "common" / definition_file
     weight_col_name = "weights"

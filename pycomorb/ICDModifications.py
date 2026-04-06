@@ -32,16 +32,12 @@ def get_icdmodification(
         AssertionError: If required columns are missing or ICD codes do not match the expected format.
     """
 
-    assert (
-        code_col in data.columns
-    ), f"Column '{code_col}' (ICD code) must be present in input DataFrame."
+    assert code_col in data.columns, f"Column '{code_col}' (ICD code) must be present in input DataFrame." # fmt: skip
+    assert year_col in data.columns, f"Column '{year_col}' (year) must be present in input DataFrame." # fmt: skip
     assert (
         data.height
         == data.filter(pl.col(code_col).str.contains(r"^[A-Z]")).height
     ), f"All values in column '{code_col}' must start with an uppercase letter (A-Z)."
-    assert (
-        year_col in data.columns
-    ), f"Column '{year_col}' (year) must be present in input DataFrame."
 
     # Unpivot the data to long format
     transfer_data = (
@@ -84,9 +80,7 @@ def get_icd10gm(
         AssertionError: If ``target_year`` is outside the supported range or required columns are missing.
     """
 
-    assert target_year in range(
-        2004, 2026
-    ), "Target year must be between 2004 and 2025."
+    assert target_year in range(2004, 2026), "Target year must be between 2004 and 2025." # fmt: skip
 
     # Load all transfer files into a dictionary of DataFrames
     transfer_file_path = Path(__file__).parent / "common/modification_DE/icd10gm.csv" # fmt: skip
@@ -118,9 +112,7 @@ def get_icd10cm(
         AssertionError: If ``target_year`` is outside the supported range or required columns are missing.
     """
 
-    assert target_year in range(
-        2015, 2026
-    ), "Target year must be between 2004 and 2025."
+    assert target_year in range(2015, 2026), "Target year must be between 2004 and 2025." # fmt: skip
 
     # Load all transfer files into a dictionary of DataFrames
     transfer_file_path = Path(__file__).parent / "common/modification_US/icd10cm.csv" # fmt: skip

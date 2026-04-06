@@ -101,12 +101,7 @@ def CharlsonComorbidityIndex(
         "rcs",
         "uk_shmi",
     ], "weights must be one of: 'charlson', 'quan', 'rcs', or 'uk_shmi'."
-    assert (
-        age_col in df.columns
-    ), f"Column '{age_col}' (age) must be present in input DataFrame."
-    assert (
-        id_col in df.columns
-    ), f"Column '{id_col}' (ID) must be present in input DataFrame."
+    assert age_col in df.columns, f"Column '{age_col}' (age) must be present in input DataFrame." # fmt: skip
 
     # STEP 0: select relevant columns and rename diagnosis code column
     # diagnoses handled by CustomComorbidityIndex

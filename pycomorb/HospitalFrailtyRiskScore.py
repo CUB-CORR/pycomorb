@@ -43,12 +43,8 @@ def HospitalFrailtyRiskScore(
 
     # Input validation
     assert icd_version == "icd10", "icd_version must be 'icd10' for HFRS."
-    assert (
-        code_col in df.columns
-    ), f"Column '{code_col}' (ICD code) must be present in input DataFrame."
-    assert (
-        id_col in df.columns
-    ), f"Column '{id_col}' (ID) must be present in input DataFrame."
+    assert id_col in df.columns, f"Column '{id_col}' (ID) must be present in input DataFrame." # fmt: skip
+    assert code_col in df.columns, f"Column '{code_col}' (ICD code) must be present in input DataFrame." # fmt: skip
 
     # Drop rows from df with missing codes
     df = df.filter(pl.col(code_col).is_not_null())

@@ -43,16 +43,10 @@ def CustomComorbidityIndex(
         "icd10",
         "icd9_10",
     ], f"icd_version must be one of: 'icd9', 'icd10', or 'icd9_10'. Got '{icd_version}'."
-    assert (
-        code_col in df.columns
-    ), f"Column '{code_col}' (ICD code) must be present in input DataFrame."
-    assert (
-        id_col in df.columns
-    ), f"Column '{id_col}' (ID) must be present in input DataFrame."
+    assert id_col in df.columns, f"Column '{id_col}' (ID) must be present in input DataFrame." # fmt: skip
+    assert code_col in df.columns, f"Column '{code_col}' (ICD code) must be present in input DataFrame." # fmt: skip
     if icd_version == "icd9_10":
-        assert (
-            icd_version_col is not None and icd_version_col in df.columns
-        ), f"For icd9_10, '{icd_version_col}' (ICD version) column must be present in input DataFrame."
+        assert icd_version_col is not None and icd_version_col in df.columns, f"For icd9_10, '{icd_version_col}' (ICD version) column must be present in input DataFrame." # fmt: skip
 
     # Load definitions
     if isinstance(definition_data, Path):
