@@ -159,6 +159,7 @@ def comorbidity(
             icd_version=icd_version,
             icd_version_col=icd_version_col,
             implementation=implementation or "quan",
+            weights=weights,
             return_categories=return_categories,
         )
     elif score in (

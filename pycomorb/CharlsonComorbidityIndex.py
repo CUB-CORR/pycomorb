@@ -42,6 +42,7 @@ def CharlsonComorbidityIndex(
     icd_version: str = "icd10",
     icd_version_col: str = None,
     implementation: str = "quan",
+    weights: str = "charlson",
     return_categories: bool = False,
 ):
     """Calculate the Charlson Comorbidity Index (CCI) using ICD codes and age.
@@ -54,6 +55,7 @@ def CharlsonComorbidityIndex(
         icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd10"``.
         icd_version_col (str, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``. Defaults to ``None``.
         implementation (str, optional): Definition set to use; ``"quan"``, ``"deyo"``, ``"romano"``, ``"dhoore"``, ``"australia"``, ``"sweden"``, ``"rcs"``, or ``"uk_shmi"``. Defaults to ``"quan"``.
+        weights (str, optional): Weighting scheme. For Charlson, weights are determined by the implementation; this parameter is accepted for API consistency. Defaults to ``None``.
         return_categories (bool, optional): If ``True``, includes indicator columns for each CCI category. Defaults to ``False``.
 
     Returns:
@@ -92,10 +94,13 @@ def CharlsonComorbidityIndex(
         "sweden",
         "rcs",
         "uk_shmi",
-    ], (
-        "implementation must be one of: "
-        "'quan', 'deyo', 'romano', 'dhoore', 'australia', 'sweden', 'rcs', or 'uk_shmi'."
-    )
+    ], "implementation must be one of: 'quan', 'deyo', 'romano', 'dhoore', 'australia', 'sweden', 'rcs', or 'uk_shmi'."
+    assert weights in [
+        "charlson",
+        "quan",
+        "rcs",
+        "uk_shmi",
+    ], "weights must be one of: 'charlson', 'quan', 'rcs', or 'uk_shmi'."
     assert (
         age_col in df.columns
     ), f"Column '{age_col}' (age) must be present in input DataFrame."
@@ -151,11 +156,38 @@ def CharlsonComorbidityIndex(
         # Should be caught by assert earlier
         raise ValueError(f"Unsupported implementation: {implementation}")
 
-    definition_file_path = Path(__file__).parent / "common" / definition_file
-    weight_col_name = "weights"
+    # Determine weight column and score column names based on weights argument
+    if implementation == "rcs":
+        weight_col_name = "rcs_weights"
+        score_col_name = "Charlson RCS Score"
+    if implementation == "uk_shmi":
+        weight_col_name = "uk_shmi_weights"
+        score_col_name = "Charlson UK SHMI Score"
+    else:
+        weight_col_name = "charlson_weights"
+        score_col_name = "Charlson Comorbidity Score"
 
     # Use a temporary score name before adding age score
     score_col_name = "Charlson Comorbidity Score"
+
+    # Load definition and weight files
+    base_path = Path(__file__).parent / "common"
+    definition_file_path = base_path / definition_file
+    weights_file_path = base_path / "CHARLSON_WEIGHTS.csv"
+
+    df_definitions = pl.read_csv(definition_file_path)
+    df_weights = pl.read_csv(weights_file_path).drop("index")
+
+    # Join definitions and weights
+    # Ensure 'category' column exists in both for joining
+    if (
+        "category" not in df_definitions.columns
+        or "category" not in df_weights.columns
+    ):
+        raise ValueError("Both definition and weight files must contain a 'category' column.") # fmt: skip
+
+    # Perform the join
+    df_combined = df_definitions.join(df_weights, on="category", how="left")
 
     # Define mutual exclusion rules for Charlson
     # These category names are common across Quan, Romano, Deyo
@@ -185,7 +217,7 @@ def CharlsonComorbidityIndex(
         code_col=code_col,
         icd_version=icd_version,
         icd_version_col=icd_version_col,
-        definition_data=definition_file_path,
+        definition_data=df_combined,
         weight_col_name=weight_col_name,
         score_col_name=score_col_name,
         mutual_exclusion_rules=mutual_exclusion_rules,

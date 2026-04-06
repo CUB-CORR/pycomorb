@@ -1,0 +1,19 @@
+index,category,charlson_weights,rcs_weights,uk_shmi_weights
+0,Age,1,0,1
+1,Myocardial infarction,1,1,5
+2,Congestive heart failure,1,1,13
+3,Peripheral vascular disease,1,1,6
+4,Cerebrovascular disease,1,1,11
+5,Dementia,1,1,14
+6,Chronic pulmonary disease,1,1,4
+7,Rheumatic disease,1,1,4
+8,Peptic ulcer disease,1,1,9
+9,Mild liver disease,1,1,8
+10,Diabetes without chronic complication,1,1,3
+11,Diabetes with chronic complication,2,1,-1
+12,Hemiplegia or paraplegia,2,1,1
+13,Renal disease,2,1,10
+14,Any malignancy,2,1,8
+15,Moderate or severe liver disease,3,1,18
+16,Metastatic solid tumor,6,1,14
+17,AIDS/HIV,6,1,2
