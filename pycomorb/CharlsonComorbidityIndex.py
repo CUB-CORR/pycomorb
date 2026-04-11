@@ -108,20 +108,23 @@ def CharlsonComorbidityIndex(
     patient_ages = df.select(id_col, age_col)
 
     # STEP 1: Calculate Age Score separately
-    # <= 50: 0
-    # <= 60: 1
-    # <= 70: 2
-    # <= 80: 3
-    #  > 80: 4
+    #  < 50: 0
+    #  < 60: 1
+    #  < 70: 2
+    #  < 80: 3
+    # >= 80: 4
     age_scores = (
         patient_ages.with_columns(
-            pl.col(age_col)
-            .cut(
-                breaks=[50, 60, 70, 80],
-                labels=["0", "1", "2", "3", "4"],
-                left_closed=False,  # Age > 50 gets score 1, etc.
-            )
-            .fill_null("0")  # Assume age 0 if null
+            pl.when(pl.col(age_col) < 50)
+            .then(pl.lit(0))
+            .when(pl.col(age_col) < 60)
+            .then(pl.lit(1))
+            .when(pl.col(age_col) < 70)
+            .then(pl.lit(2))
+            .when(pl.col(age_col) < 80)
+            .then(pl.lit(3))
+            .otherwise(pl.lit(4))
+            .fill_null(0)  # Assume age 0 if null
             .cast(int)
             .alias("Age Score")
         )
