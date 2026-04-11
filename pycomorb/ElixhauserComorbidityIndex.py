@@ -23,6 +23,8 @@ import polars as pl
 # Import the generalized function
 from .CustomComorbidityIndex import CustomComorbidityIndex
 
+SCORE_COL_NAME = "Elixhauser Comorbidity Index"
+
 
 def ElixhauserComorbidityIndex(
     df: pl.DataFrame,
@@ -91,22 +93,14 @@ def ElixhauserComorbidityIndex(
     # Determine weight column and score column names based on weights argument
     if weights == "van_walraven":
         weight_col_name = "van_walraven_weights"
-        score_col_name = "Elixhauser van Walraven Score"
     elif weights == "thompson_30":
-        weight_col_name = "Thompson_30_weights"
-        score_col_name = "Elixhauser Thompson(30) Score"
+        weight_col_name = "thompson_30_weights"
     elif weights == "thompson_29":
-        weight_col_name = "Thompson_29_weights"
-        score_col_name = "Elixhauser Thompson(29) Score"
+        weight_col_name = "thompson_29_weights"
     elif weights == "ahrq":
         weight_col_name = "AHRQ_weights"
-        score_col_name = "Elixhauser AHRQ Score"
     elif weights == "swiss":
         weight_col_name = "swiss_weights"
-        score_col_name = "Elixhauser Swiss Score"
-    else:
-        # Should be caught by assert earlier, but as a safeguard
-        raise ValueError(f"Unsupported weights scheme: {weights}")
 
     # Load definition and weight files
     base_path = Path(__file__).parent / "common"
@@ -142,7 +136,7 @@ def ElixhauserComorbidityIndex(
         icd_version_col=icd_version_col,
         definition_data=df_combined,
         weight_col_name=weight_col_name,
-        score_col_name=score_col_name,
+        score_col_name=SCORE_COL_NAME,
         mutual_exclusion_rules=mutual_exclusion_rules,
         return_categories=return_categories,
     )

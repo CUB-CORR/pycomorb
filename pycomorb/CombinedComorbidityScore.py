@@ -1,4 +1,4 @@
-# Reference for GCI:
+# Reference for CCS:
 # 1. Gagne JJ, Glynn RJ, Avorn J, Levin R, Schneeweiss S.
 #    A combined comorbidity score predicted mortality in elderly patients better than existing scores.
 #    J Clin Epidemiol. 2011 Jul;64(7):749-59.
@@ -27,17 +27,18 @@ import polars as pl
 # Import the generalized function
 from .CustomComorbidityIndex import CustomComorbidityIndex
 
+SCORE_COL_NAME = "Combined Comorbidity Score"
 
-def GagneComorbidityIndex(
+
+def CombinedComorbidityScore(
     df: pl.DataFrame,
     id_col: str = "id",
     code_col: str = "code",
     icd_version: str = "icd9",
     icd_version_col: str = None,
     return_categories=False,
-    gagne_name: bool = False,
 ):
-    """Calculate the Gagne Comorbidity Index using ICD codes.
+    """Calculate the Combined Comorbidity Score using ICD codes.
 
     Args:
         df (pl.DataFrame): Input data containing at least ``id_col`` and ``code_col``.
@@ -45,8 +46,7 @@ def GagneComorbidityIndex(
         code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
         icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd9"``.
         icd_version_col (str, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``. Defaults to ``None``.
-        return_categories (bool, optional): If ``True``, includes indicator columns for each Gagne category. Defaults to ``False``.
-        gagne_name (bool, optional): If ``True``, name the score column ``"Gagne Score"``; otherwise use ``"Combined Comorbidity Score"``. Defaults to ``False``.
+        return_categories (bool, optional): If ``True``, includes indicator columns for each Combined Comorbidity Score category. Defaults to ``False``.
 
     Returns:
         pl.DataFrame: DataFrame containing ``id_col``, the calculated score column, and, when ``return_categories`` is ``True``, category indicators.
@@ -58,7 +58,6 @@ def GagneComorbidityIndex(
     definition_file = "GAGNE.csv"
     definition_file_path = Path(__file__).parent / "common" / definition_file
     weight_col_name = "weights"
-    score_col_name = "Gagne Score" if gagne_name else "Combined Comorbidity Score"
 
     # Define mutual exclusion rules for combined score
     mutual_exclusion_rules = [
@@ -66,7 +65,7 @@ def GagneComorbidityIndex(
     ]
 
     # Call the generalized function
-    df_gagne = CustomComorbidityIndex(
+    df_ccs = CustomComorbidityIndex(
         df=df,
         id_col=id_col,
         code_col=code_col,
@@ -74,9 +73,9 @@ def GagneComorbidityIndex(
         icd_version_col=icd_version_col,
         definition_data=definition_file_path,
         weight_col_name=weight_col_name,
-        score_col_name=score_col_name,
+        score_col_name=SCORE_COL_NAME,
         mutual_exclusion_rules=mutual_exclusion_rules,
         return_categories=return_categories,
     )
 
-    return df_gagne
+    return df_ccs

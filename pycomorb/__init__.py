@@ -7,9 +7,9 @@ import pandas as pd
 import polars as pl
 
 from .CharlsonComorbidityIndex import CharlsonComorbidityIndex
+from .CombinedComorbidityScore import CombinedComorbidityScore
 from .CustomComorbidityIndex import CustomComorbidityIndex
 from .ElixhauserComorbidityIndex import ElixhauserComorbidityIndex
-from .GagneComorbidityIndex import GagneComorbidityIndex
 from .HospitalFrailtyRiskScore import HospitalFrailtyRiskScore
 from .ICDModifications import get_icd10cm, get_icd10gm
 
@@ -38,7 +38,7 @@ def comorbidity(
     """Calculate a comorbidity or frailty score from ICD-coded data.
 
     Args:
-        score (str): Name of the score to calculate. Supported values are ``"charlson"``, ``"elixhauser"``, ``"gagne"``, ``"hfrs"``, and ``"custom"`` (case-insensitive and including common aliases such as ``"cci"`` or ``"eci"``).
+        score (str): Name of the score to calculate. Supported values are ``"charlson"``, ``"elixhauser"``, ``"combined"``, ``"hfrs"``, and ``"custom"`` (case-insensitive and including common aliases such as ``"cci"`` or ``"eci"``).
         df (pl.DataFrame | pandas.DataFrame): Input data containing at least ``id_col`` and ``code_col``. Additional columns such as ``age_col`` or ``year_col`` are required depending on the chosen score.
         id_col (str, optional): Column name containing unique identifiers. Defaults to ``"id"``.
         code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
@@ -111,14 +111,10 @@ def comorbidity(
     contains_dot = df.select(
         pl.col(code_col).str.contains(r"\.").any().alias("contains_dot")
     ).to_dicts()[0]["contains_dot"]
-    assert (
-        not contains_dot
-    ), f"All values in column '{code_col}' must not contain dots ('.'). Consider setting fix_dot_in_icd_code=True."
-    
+    assert not contains_dot, f"All values in column '{code_col}' must not contain dots ('.'). Consider setting fix_dot_in_icd_code=True." # fmt: skip
+
     # strip whitespace from ICD codes, and make uppercase
-    df = df.with_columns(
-        pl.col(code_col).str.strip_chars().str.to_uppercase()
-    )
+    df = df.with_columns(pl.col(code_col).str.strip_chars().str.to_uppercase())
 
     # apply ICD modification if requested
     if icd_modification is not None and "10" in icd_version:
@@ -179,22 +175,23 @@ def comorbidity(
             return_categories=return_categories,
         )
     elif score in (
-        "gci",
-        "gagne",
-        "gagnecomorbidityindex",
-        "gagne_comorbidity_index",
+        "ccs",
         "combined",
         "combinedcomorbidityindex",
         "combined_comorbidity_index",
+        "combinedcomorbidityscore",
+        "combined_comorbidity_score",
+        "gagne",
+        "gagnecomorbidityindex",
+        "gagne_comorbidity_index",
     ):
-        return_df = GagneComorbidityIndex(
+        return_df = CombinedComorbidityScore(
             df=df,
             id_col=id_col,
             code_col=code_col,
             icd_version=icd_version,
             icd_version_col=icd_version_col,
             return_categories=return_categories,
-            gagne_name="gagne" in score,
         )
     elif score in (
         "hfrs",

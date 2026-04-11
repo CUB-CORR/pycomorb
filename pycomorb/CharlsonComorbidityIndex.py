@@ -33,6 +33,9 @@ import polars as pl
 # Import the generalized function
 from .CustomComorbidityIndex import CustomComorbidityIndex
 
+SCORE_COL_NAME = "Charlson Comorbidity Index"
+FINAL_SCORE_COL_NAME = "Charlson Age-Comorbidity Score"
+
 
 def CharlsonComorbidityIndex(
     df: pl.DataFrame,
@@ -59,7 +62,7 @@ def CharlsonComorbidityIndex(
         return_categories (bool, optional): If ``True``, includes indicator columns for each CCI category. Defaults to ``False``.
 
     Returns:
-        pl.DataFrame: DataFrame containing ``id_col``, the ``"Charlson Score"`` column, and, when ``return_categories`` is ``True``, category indicators and the ``"Age Score"`` column.
+        pl.DataFrame: DataFrame containing ``id_col``, the ``"Charlson Age-Comorbidity Score"`` column, and, when ``return_categories`` is ``True``, category indicators and the ``"Age Score"`` column.
 
     Raises:
         AssertionError: If required columns are missing.
@@ -157,19 +160,12 @@ def CharlsonComorbidityIndex(
     # Determine weight column and score column names based on weights argument
     if weights == "quan":
         weight_col_name = "quan_weights"
-        score_col_name = "Charlson Quan Score"
-    if implementation == "rcs":
+    if weights == "rcs":
         weight_col_name = "rcs_weights"
-        score_col_name = "Charlson RCS Score"
-    if implementation == "uk_shmi":
+    if weights == "uk_shmi":
         weight_col_name = "uk_shmi_weights"
-        score_col_name = "Charlson UK SHMI Score"
     else:
         weight_col_name = "charlson_weights"
-        score_col_name = "Charlson Comorbidity Score"
-
-    # Use a temporary score name before adding age score
-    score_col_name = "Charlson Comorbidity Score"
 
     # Load definition and weight files
     base_path = Path(__file__).parent / "common"
@@ -193,12 +189,9 @@ def CharlsonComorbidityIndex(
     # Define mutual exclusion rules for Charlson
     # These category names are common across Quan, Romano, Deyo
     mutual_exclusion_rules = [
-        (
-            "Diabetes with chronic complication",
-            "Diabetes without chronic complication",
-        ),
+        ("Diabetes with chronic complication", "Diabetes without chronic complication"),
         ("Moderate or severe liver disease", "Mild liver disease"),
-    ]
+    ] # fmt: skip
     # Adjust rules for specific implementations if category names differ
     if implementation == "australia" or implementation == "uk_shmi":
         mutual_exclusion_rules = [
@@ -220,18 +213,17 @@ def CharlsonComorbidityIndex(
         icd_version_col=icd_version_col,
         definition_data=df_combined,
         weight_col_name=weight_col_name,
-        score_col_name=score_col_name,
+        score_col_name=SCORE_COL_NAME,
         mutual_exclusion_rules=mutual_exclusion_rules,
         return_categories=return_categories,
     )
 
     # STEP 3: Combine Age Score and Comorbidity Score
-    final_score_col_name = "Charlson Score"
     df_charlson = df_charlson.join(
         age_scores, on=id_col, how="left", coalesce=True
     ).with_columns(
-        (pl.col(score_col_name) + pl.col("Age Score")).alias(
-            final_score_col_name
+        (pl.col(SCORE_COL_NAME) + pl.col("Age Score")).alias(
+            FINAL_SCORE_COL_NAME
         )
     )
 
@@ -263,7 +255,7 @@ def CharlsonComorbidity_10year_survival(
         icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd10"``.
         icd_version_col (str | None, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``.
         implementation (str, optional): Charlson definition set passed to :func:`CharlsonComorbidityIndex`. Defaults to ``"quan"``.
-        precalculated_df (bool, optional): If ``True``, assumes ``df`` already includes a ``"Charlson Score"`` column. Defaults to ``False``.
+        precalculated_df (bool, optional): If ``True``, assumes ``df`` already includes a ``"Charlson Age-Comorbidity Score"`` column. Defaults to ``False``.
 
     Returns:
         pl.DataFrame: DataFrame with two columns: ``id_col`` and ``"10-year survival probability"``.
@@ -285,7 +277,7 @@ def CharlsonComorbidity_10year_survival(
         )
     else:
         assert (
-            "Charlson Score" in df.columns
+            FINAL_SCORE_COL_NAME in df.columns
         ), "Input DataFrame must contain column 'Charlson Score'."
         assert (
             id_col in df.columns
@@ -293,7 +285,7 @@ def CharlsonComorbidity_10year_survival(
 
     # Formula: 0.983 ^ (CCI Score * 0.9)
     return df.with_columns(
-        (pl.lit(0.983) ** (pl.col("Charlson Score").clip(lower_bound=0) * 0.9))
+        (0.983 ** (pl.col(FINAL_SCORE_COL_NAME) * 0.9))
         .round(3)
         .alias("10-year survival probability")
     ).select(id_col, "10-year survival probability")

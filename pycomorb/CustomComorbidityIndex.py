@@ -158,7 +158,13 @@ def CustomComorbidityIndex(
         df10, cats10 = process_single_icd(df_icd10, "icd10_codes")
 
         # Combine: outer join on id_col, take max for each category
-        all_categories = sorted(set(cats9) | set(cats10))
+        # Preserve definition file order instead of alphabetical sorting
+        all_categories_set = set(cats9) | set(cats10)
+        all_categories = [
+            cat
+            for cat in definitions["category"].to_list()
+            if cat in all_categories_set and cat is not None
+        ]
         df_combined = df9.join(
             df10, on=id_col, how="outer", suffix="_right", coalesce=True
         )
