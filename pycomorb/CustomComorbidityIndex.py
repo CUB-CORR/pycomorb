@@ -88,7 +88,7 @@ def CustomComorbidityIndex(
         )
 
         # Get all unique ICD codes in the data
-        code_prefixes = code_map.select("prefix").to_series()
+        code_prefixes = code_map.select("prefix").to_series().to_list()
         unique_codes = df.select(code_col).unique()
         longest_code = max(unique_codes.to_series().to_list(), key=len)
 

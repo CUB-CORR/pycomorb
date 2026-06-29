@@ -16,11 +16,11 @@
 # 4. Original Elixhauser definitions (used when implementation='elixhauser')
 # 5. AHRQ definitions (used when implementation='ahrq_icd9' or 'ahrq_icd10')
 
+import warnings
 from pathlib import Path
 
 import polars as pl
 
-# Import the generalized function
 from .CustomComorbidityIndex import CustomComorbidityIndex
 
 SCORE_COL_NAME = "Elixhauser Comorbidity Index"
@@ -61,11 +61,19 @@ def ElixhauserComorbidityIndex(
         "elixhauser",
         "ahrq_icd9",
     ]:
-        print(f"Warning: Implementation '{implementation}' only uses ICD-9. Setting ICD version to 'icd9'.")  # fmt: skip
+        warnings.warn(
+            f"Implementation '{implementation}' only uses ICD-9. Setting ICD version to 'icd9'.",
+            UserWarning,
+            stacklevel=2
+        )
         icd_version = "icd9"
     # Change ICD to ICD-10 for AHRQ ICD-10
     if icd_version == "icd9" and implementation in ["ahrq_icd10"]:
-        print(f"Warning: Implementation '{implementation}' only uses ICD-10. Setting ICD version to 'icd10'.") # fmt: skip
+        warnings.warn(
+            f"Implementation '{implementation}' only uses ICD-10. Setting ICD version to 'icd10'.",
+            UserWarning,
+            stacklevel=2
+        )
         icd_version = "icd10"
 
     # Input validation specific to Elixhauser
@@ -91,7 +99,20 @@ def ElixhauserComorbidityIndex(
         raise ValueError(f"Unsupported implementation: {implementation}")
 
     # Determine weight column and score column names based on weights argument
-    if weights == "van_walraven":
+    # AHRQ implementation auto-enforces AHRQ weights
+    weight_col_name = "van_walraven_weights"  # default
+    
+    # Implementation-specific overrides (AHRQ always uses AHRQ weights)
+    if implementation and implementation.lower().startswith("ahrq"):
+        if weights and weights.lower() != "ahrq":
+            warnings.warn(
+                f"Implementation '{implementation}' requires 'ahrq' weights. Overriding weights='{weights}' with 'ahrq_weights'.",
+                UserWarning,
+                stacklevel=2
+            )
+        weight_col_name = "AHRQ_weights"
+    # Standard weights parameter selection
+    elif weights == "van_walraven":
         weight_col_name = "van_walraven_weights"
     elif weights == "thompson_30":
         weight_col_name = "thompson_30_weights"

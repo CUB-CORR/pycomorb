@@ -26,11 +26,11 @@
 #    Br J Surg. 2010 May;97(5):772-81.
 #    doi: 10.1002/bjs.6930. PMID: 20306528.
 
+import warnings
 from pathlib import Path
 
 import polars as pl
 
-# Import the generalized function
 from .CustomComorbidityIndex import CustomComorbidityIndex
 
 SCORE_COL_NAME = "Charlson Comorbidity Index"
@@ -75,7 +75,11 @@ def CharlsonComorbidityIndex(
         "dhoore",
         "romano",
     ]:
-        print(f"Warning: Implementation '{implementation}' only uses ICD-9. Setting ICD version to 'icd9'.") # fmt: skip
+        warnings.warn(
+            f"Implementation '{implementation}' only uses ICD-9. Setting ICD version to 'icd9'.",
+            UserWarning,
+            stacklevel=2,
+        )
         icd_version = "icd9"
     # Change ICD to ICD-10 for Australian, Swedish and UK versions
     elif icd_version == "icd9" and implementation in [
@@ -84,7 +88,11 @@ def CharlsonComorbidityIndex(
         "rcs",
         "uk_shmi",
     ]:
-        print(f"Warning: Implementation '{implementation}' only uses ICD-10. Setting ICD version to 'icd10'.") # fmt: skip
+        warnings.warn(
+            f"Implementation '{implementation}' only uses ICD-10. Setting ICD version to 'icd10'.",
+            UserWarning,
+            stacklevel=2,
+        )
         icd_version = "icd10"
 
     # Input validation specific to Charlson
@@ -158,14 +166,30 @@ def CharlsonComorbidityIndex(
         raise ValueError(f"Unsupported implementation: {implementation}")
 
     # Determine weight column and score column names based on weights argument
+    # Special implementations auto-enforce their corresponding weights
+    weight_col_name = "charlson_weights"
+
     if weights == "quan":
         weight_col_name = "quan_weights"
-    if weights == "rcs":
+
+    # Implementation-specific weights override the weights parameter
+    if implementation == "rcs":
+        if weights and weights != "rcs":
+            warnings.warn(
+                f"Implementation 'rcs' requires 'rcs_weights'. Overriding weights='{weights}' with 'rcs_weights'.",
+                UserWarning,
+                stacklevel=2,
+            )
         weight_col_name = "rcs_weights"
-    if weights == "uk_shmi":
+
+    if implementation == "uk_shmi":
+        if weights and weights != "uk_shmi":
+            warnings.warn(
+                f"Implementation 'uk_shmi' requires 'uk_shmi_weights'. Overriding weights='{weights}' with 'uk_shmi_weights'.",
+                UserWarning,
+                stacklevel=2,
+            )
         weight_col_name = "uk_shmi_weights"
-    else:
-        weight_col_name = "charlson_weights"
 
     # Load definition and weight files
     base_path = Path(__file__).parent / "common"

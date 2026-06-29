@@ -24,7 +24,6 @@ from pathlib import Path
 
 import polars as pl
 
-# Import the generalized function
 from .CustomComorbidityIndex import CustomComorbidityIndex
 
 SCORE_COL_NAME = "Combined Comorbidity Score"
