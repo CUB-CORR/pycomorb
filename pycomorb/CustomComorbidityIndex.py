@@ -1,3 +1,4 @@
+from collections import defaultdict
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
@@ -14,6 +15,7 @@ def CustomComorbidityIndex(
     weight_col_name: str = None,
     score_col_name: str = None,
     mutual_exclusion_rules: Optional[List[Tuple[str, str]]] = None,
+    year_col: str = None,
     return_categories=False,
 ):
     """Compute a custom comorbidity score from ICD-coded input data.
@@ -24,10 +26,11 @@ def CustomComorbidityIndex(
         code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
         icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd10"``.
         icd_version_col (str, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``. Defaults to ``None``.
-        definition_data (Path | pl.DataFrame, optional): Path to a CSV file or DataFrame containing category definitions and weights. Defaults to ``None``.
+        definition_data (Path | pl.DataFrame, optional): Path to a CSV file or DataFrame containing category definitions and weights. May optionally include an ``and_group`` column: rows sharing a ``category`` and a non-empty ``and_group`` value must all be present (AND) for that group to count, OR'd into the category's normal presence; blank ``and_group`` behaves as before. Defaults to ``None``.
         weight_col_name (str, optional): Column name with weights inside ``definition_data``. Defaults to ``None``.
         score_col_name (str, optional): Column name assigned to the calculated score in the result. Defaults to ``None``.
         mutual_exclusion_rules (list[tuple[str, str]], optional): Pairs of mutually exclusive categories where the second entry is suppressed when the first is present. Defaults to ``None``.
+        year_col (str, optional): Column name with each record's definition-catalogue year (e.g. ICD-10-GM catalogue year). When provided, ``definition_data`` must include a ``year`` column, and a code only matches a category as of the definition row's year onward (``df[year_col] >= definitions["year"]``). Defaults to ``None`` (year-independent matching, the historical behavior).
         return_categories (bool, optional): If ``True``, includes indicator columns for each matched category. Defaults to ``False``.
 
     Returns:
@@ -64,28 +67,25 @@ def CustomComorbidityIndex(
     # Drop rows from df with missing codes
     df = df.filter(pl.col(code_col).is_not_null())
 
+    # Year gating only applies when both year_col and a year column are given
+    year_aware = year_col is not None and "year" in definitions.columns
+
     def process_single_icd(df, icd_col_name):
-        # Prepare mapping DataFrame: code_col, category
-        code_map_rows = []
-        for row in definitions.iter_rows(named=True):
+        # Prepare mapping DataFrame: prefix, bit, since. Every definition row is one bit in a
+        # per-patient mask; a category is present if all bits of one of its groups are set,
+        # where a group is a single row or the rows sharing an and_group.
+        categories_list = definitions["category"].drop_nulls().unique(maintain_order=True).to_list()
+        required, code_map_rows = defaultdict(lambda: defaultdict(int)), []
+        for i, row in enumerate(definitions.iter_rows(named=True)):
             if row["category"] is None or row.get(icd_col_name) is None:
                 continue
+            bit = 1 << i
+            required[row["category"]][row.get("and_group") or i] |= bit
             for code in row[icd_col_name].split("|"):
                 code_map_rows.append(
-                    {"prefix": code.strip(), "category": row["category"]}
+                    {"prefix": code.strip(), "bit": bit, "since": row["year"] if year_aware else 0}
                 )
         code_map = pl.DataFrame(code_map_rows)
-
-        # Create dataframe with presence indicators
-        categories = code_map.select("category").unique()
-        categories_list = categories.to_series().to_list()
-        categories_df = categories.with_columns(
-            pl.when(pl.col("category") == category)
-            .then(pl.lit(1))
-            .otherwise(pl.lit(0))
-            .alias(category)
-            for category in categories_list
-        )
 
         # Get all unique ICD codes in the data
         code_prefixes = code_map.select("prefix").to_series().to_list()
@@ -121,27 +121,37 @@ def CustomComorbidityIndex(
             .drop_nulls("best_prefix")
         )
 
-        code_to_category = (
+        # Join diagnoses with the bits of their code; only matching diagnoses are aggregated
+        matches = df.join(
             best_prefix.join(
-                code_map, left_on="best_prefix", right_on="prefix", how="left"
-            )
-            .select(code_col, "category")
-            .join(categories_df, on="category", how="left")
-            .select(code_col, *categories_list)
+                code_map, left_on="best_prefix", right_on="prefix"
+            ).select(code_col, "bit", "since"),
+            on=code_col,
         )
+        if year_aware:
+            matches = matches.filter(pl.col(year_col) >= pl.col("since"))
 
-        # Join diagnoses with code_to_category to get the best matching category for each diagnosis
         df_presence_absence = (
-            df.join(code_to_category, on=code_col, how="left")
-            .group_by(id_col)
-            .agg(pl.max(cat).fill_null(0).alias(cat) for cat in categories_list)
+            df.select(id_col)
+            .unique()
+            .join(matches.group_by(id_col).agg(pl.col("bit").bitwise_or().alias("mask")), on=id_col, how="left")
+            .with_columns(pl.col("mask").fill_null(0))
+            .select(
+                id_col,
+                *(
+                    pl.any_horizontal((pl.col("mask") & m) == m for m in masks.values())
+                    .cast(int)
+                    .alias(cat)
+                    for cat, masks in required.items()
+                ),
+            )
         )
 
         # Add missing columns
         for cat in categories_list:
             if cat not in df_presence_absence.columns:
                 df_presence_absence = df_presence_absence.with_columns(
-                    pl.lit(0).alias(cat)
+                    pl.lit(0).cast(int).alias(cat)
                 )
         df_presence_absence = df_presence_absence.select(
             [id_col] + categories_list

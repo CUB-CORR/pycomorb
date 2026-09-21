@@ -154,6 +154,7 @@ def comorbidity(
             age_col=age_col,
             icd_version=icd_version,
             icd_version_col=icd_version_col,
+            year_col=year_col,
             implementation=implementation or "quan",
             weights=weights,
             return_categories=return_categories,
