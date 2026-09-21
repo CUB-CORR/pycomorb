@@ -44,6 +44,7 @@ def CharlsonComorbidityIndex(
     age_col: str = "age",
     icd_version: str = "icd10",
     icd_version_col: str = None,
+    year_col: str = None,
     implementation: str = "quan",
     weights: str = "charlson",
     return_categories: bool = False,
@@ -57,7 +58,8 @@ def CharlsonComorbidityIndex(
         age_col (str, optional): Column name containing patient ages. Defaults to ``"age"``.
         icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd10"``.
         icd_version_col (str, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``. Defaults to ``None``.
-        implementation (str, optional): Definition set to use; ``"quan"``, ``"deyo"``, ``"romano"``, ``"dhoore"``, ``"australia"``, ``"sweden"``, ``"rcs"``, or ``"uk_shmi"``. Defaults to ``"quan"``.
+        year_col (str, optional): Column name with each record's ICD-10-GM catalogue year. Required when ``implementation`` is ``"sokolowski"`` (ignored otherwise), since that mapping is year-specific. Defaults to ``None``.
+        implementation (str, optional): Definition set to use; ``"quan"``, ``"deyo"``, ``"romano"``, ``"dhoore"``, ``"australia"``, ``"sweden"``, ``"rcs"``, ``"uk_shmi"``, or ``"sokolowski"``. Defaults to ``"quan"``.
         weights (str, optional): Weighting scheme. For Charlson, weights are determined by the implementation; this parameter is accepted for API consistency. Defaults to ``None``.
         return_categories (bool, optional): If ``True``, includes indicator columns for each CCI category. Defaults to ``False``.
 
@@ -81,12 +83,13 @@ def CharlsonComorbidityIndex(
             stacklevel=2,
         )
         icd_version = "icd9"
-    # Change ICD to ICD-10 for Australian, Swedish and UK versions
+    # Change ICD to ICD-10 for Australian, Swedish, UK and Sokołowski versions
     elif icd_version == "icd9" and implementation in [
         "australia",
         "sweden",
         "rcs",
         "uk_shmi",
+        "sokolowski",
     ]:
         warnings.warn(
             f"Implementation '{implementation}' only uses ICD-10. Setting ICD version to 'icd10'.",
@@ -105,7 +108,8 @@ def CharlsonComorbidityIndex(
         "sweden",
         "rcs",
         "uk_shmi",
-    ], "implementation must be one of: 'quan', 'deyo', 'romano', 'dhoore', 'australia', 'sweden', 'rcs', or 'uk_shmi'."
+        "sokolowski",
+    ], "implementation must be one of: 'quan', 'deyo', 'romano', 'dhoore', 'australia', 'sweden', 'rcs', 'uk_shmi', or 'sokolowski'."
     assert weights in [
         "charlson",
         "quan",
@@ -113,6 +117,8 @@ def CharlsonComorbidityIndex(
         "uk_shmi",
     ], "weights must be one of: 'charlson', 'quan', 'rcs', or 'uk_shmi'."
     assert age_col in df.columns, f"Column '{age_col}' (age) must be present in input DataFrame." # fmt: skip
+    if implementation == "sokolowski":
+        assert year_col is not None and year_col in df.columns, "Implementation 'sokolowski' requires a 'year_col' column (ICD-10-GM catalogue year) in the input DataFrame." # fmt: skip
 
     # STEP 0: select relevant columns and rename diagnosis code column
     # diagnoses handled by CustomComorbidityIndex
@@ -161,6 +167,8 @@ def CharlsonComorbidityIndex(
         definition_file = "CHARLSON_RCS.csv"
     elif implementation == "uk_shmi":
         definition_file = "CHARLSON_UK_SHMI_v1.55.csv"
+    elif implementation == "sokolowski":
+        definition_file = "CHARLSON_SOKOLOWSKI.csv"
     else:
         # Should be caught by assert earlier
         raise ValueError(f"Unsupported implementation: {implementation}")
@@ -217,7 +225,12 @@ def CharlsonComorbidityIndex(
         ("Moderate or severe liver disease", "Mild liver disease"),
     ] # fmt: skip
     # Adjust rules for specific implementations if category names differ
-    if implementation == "australia" or implementation == "uk_shmi":
+    if implementation == "australia":
+        mutual_exclusion_rules = [
+            ("Diabetes complications", "Diabetes"),
+            ("Moderate or severe liver disease", "Mild liver disease"),
+        ]
+    elif implementation == "uk_shmi":
         mutual_exclusion_rules = [
             ("Diabetes complications", "Diabetes"),
             ("Severe liver disease", "Liver disease"),
@@ -228,6 +241,12 @@ def CharlsonComorbidityIndex(
             # Sweden uses 'Moderate or severe kidney disease' - no specific liver exclusion rule needed based on provided names
             # Sweden splits Pulmonary disease - no exclusion needed between them
         ]
+    elif implementation == "sokolowski":
+        mutual_exclusion_rules = [
+            ("Moderate or severe liver disease", "Mild liver disease"),
+            ("Metastatic solid tumor", "Any malignancy"),
+            ("Diabetes with chronic complication", "Diabetes without chronic complication"),
+        ] # fmt: skip
 
     df_charlson = CustomComorbidityIndex(
         df=df,
@@ -235,6 +254,7 @@ def CharlsonComorbidityIndex(
         code_col=code_col,
         icd_version=icd_version,
         icd_version_col=icd_version_col,
+        year_col=year_col if implementation == "sokolowski" else None,
         definition_data=df_combined,
         weight_col_name=weight_col_name,
         score_col_name=SCORE_COL_NAME,
