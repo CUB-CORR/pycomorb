@@ -43,8 +43,8 @@ def CharlsonComorbidityIndex(
     code_col: str = "code",
     age_col: str = "age",
     icd_version: str = "icd10",
-    icd_version_col: str = None,
-    year_col: str = None,
+    icd_version_col: str | None = None,
+    year_col: str | None = None,
     implementation: str = "quan",
     weights: str = "charlson",
     return_categories: bool = False,
@@ -72,7 +72,7 @@ def CharlsonComorbidityIndex(
     """
 
     # Change ICD to ICD-9 for Deyo, D'Hoore and Romano
-    if icd_version == "icd10" and implementation in [
+    if icd_version in ("icd10", "icd9_10") and implementation in [
         "deyo",
         "dhoore",
         "romano",
@@ -84,7 +84,7 @@ def CharlsonComorbidityIndex(
         )
         icd_version = "icd9"
     # Change ICD to ICD-10 for Australian, Swedish, UK and Sokołowski versions
-    elif icd_version == "icd9" and implementation in [
+    elif icd_version in ("icd9", "icd9_10") and implementation in [
         "australia",
         "sweden",
         "rcs",
@@ -285,7 +285,7 @@ def CharlsonComorbidity_10year_survival(
     code_col: str = "code",
     age_col: str = "age",
     icd_version: str = "icd10",
-    icd_version_col: str = None,
+    icd_version_col: str | None = None,
     implementation: str = "quan",
     precalculated_df: bool = False,
 ) -> pl.DataFrame:

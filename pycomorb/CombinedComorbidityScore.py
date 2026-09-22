@@ -34,7 +34,7 @@ def CombinedComorbidityScore(
     id_col: str = "id",
     code_col: str = "code",
     icd_version: str = "icd9",
-    icd_version_col: str = None,
+    icd_version_col: str | None = None,
     return_categories=False,
 ):
     """Calculate the Combined Comorbidity Score using ICD codes.
