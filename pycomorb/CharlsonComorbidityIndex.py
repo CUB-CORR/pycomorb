@@ -84,10 +84,9 @@ def CharlsonComorbidityIndex(
             stacklevel=2,
         )
         icd_version = "icd9"
-    # Change ICD to ICD-10 for Australian, Swedish, UK and Sokołowski versions
+    # Change ICD to ICD-10 for Australian, UK and Sokołowski versions
     elif icd_version in ("icd9", "icd9_10") and implementation in [
         "australia",
-        "sweden",
         "rcs",
         "uk_shmi",
         "sokolowski",
