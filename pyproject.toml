@@ -10,6 +10,7 @@ requires-python = ">=3.10"
 dependencies = [
     "pandas",
     "polars>=1.0.0",
+    "pyyaml",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -27,7 +28,7 @@ backend-path = ["."]
 packages = ["pycomorb"]
 
 [tool.setuptools.package-data]
-pycomorb = ["common/**/*.csv"]
+pycomorb = ["common/**/*.csv", "common/**/*.yaml"]
 
 [tool.setuptools_scm]
 version_file = "pycomorb/_version.py"

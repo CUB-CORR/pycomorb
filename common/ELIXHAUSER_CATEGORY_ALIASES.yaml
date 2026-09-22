@@ -1,0 +1,23 @@
+# Category renames vs. ELIXHAUSER_WEIGHTS.csv's canonical (Quan-based) names,
+# by implementation.
+ahrq_icd9:
+  Diabetes without chronic complications: Diabetes uncomplicated
+  Diabetes with chronic complications: Diabetes complicated
+  Hypertension: Hypertension uncomplicated
+ahrq_icd10:
+  Diabetes without chronic complications: Diabetes uncomplicated
+  Diabetes with chronic complications: Diabetes complicated
+  Acquired immune deficiency syndrome: AIDS/HIV
+  Anemias due to other nutritional deficiencies: Deficiency anemia
+  Chronic blood loss anemia (iron deficiency): Blood loss anemia
+  Solid tumor without metastasis, malignant: Solid tumor without metastasis
+  Heart failure: Congestive heart failure
+  Hypertension, complicated: Hypertension complicated
+  Hypertension, uncomplicated: Hypertension uncomplicated
+  Peripheral vascular disease: Peripheral vascular disorders
+  Pulmonary circulation disease: Pulmonary circulation disorders
+  Peptic ulcer disease: Peptic ulcer disease excluding bleeding
+  Autoimmune conditions: Rheumatoid arthritis/collagen vascular diseases
+  # only the milder tier aliases, to avoid double-counting both tiers
+  Liver disease, mild: Liver disease
+  Renal failure, moderate: Renal failure

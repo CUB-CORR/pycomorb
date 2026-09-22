@@ -1,0 +1,30 @@
+# Category renames vs. CHARLSON_WEIGHTS.csv's canonical names, by implementation.
+australia:
+  Connective tissue disorder: Rheumatic disease
+  Diabetes: Diabetes without chronic complication
+  Diabetes complications: Diabetes with chronic complication
+  Paraplegia: Hemiplegia or paraplegia
+  Cancer: Any malignancy
+sweden:
+  Chronic obstructive pulmonary disease (COPD): Chronic pulmonary disease
+  Other chronic pulmonary disease: Chronic pulmonary disease
+  (Peptic) Ulcer disease: Peptic ulcer disease
+  Diabetes: Diabetes without chronic complication
+  Diabetes with end organ damage: Diabetes with chronic complication
+  Hemiplegia, tetraplegia: Hemiplegia or paraplegia
+  Moderate or severe kidney disease: Renal disease
+  Any malignancy, including lymphoma and leukemia: Any malignancy
+  Metastatic cancer: Metastatic solid tumor
+uk_shmi:
+  Acute myocardial infarction: Myocardial infarction
+  Cerebral vascular accident: Cerebrovascular disease
+  Pulmonary disease: Chronic pulmonary disease
+  Connective tissue disorder: Rheumatic disease
+  Peptic ulcer: Peptic ulcer disease
+  Liver disease: Mild liver disease
+  Diabetes: Diabetes without chronic complication
+  Diabetes complications: Diabetes with chronic complication
+  Paraplegia: Hemiplegia or paraplegia
+  Cancer: Any malignancy
+  Severe liver disease: Moderate or severe liver disease
+  Metastatic cancer: Metastatic solid tumor

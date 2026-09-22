@@ -30,6 +30,7 @@ import warnings
 from pathlib import Path
 
 import polars as pl
+import yaml
 
 from .CustomComorbidityIndex import CustomComorbidityIndex
 
@@ -174,30 +175,15 @@ def CharlsonComorbidityIndex(
         raise ValueError(f"Unsupported implementation: {implementation}")
 
     # Determine weight column and score column names based on weights argument
-    # Special implementations auto-enforce their corresponding weights
-    weight_col_name = "charlson_weights"
-
-    if weights == "quan":
-        weight_col_name = "quan_weights"
-
-    # Implementation-specific weights override the weights parameter
-    if implementation == "rcs":
-        if weights and weights != "rcs":
-            warnings.warn(
-                f"Implementation 'rcs' requires 'rcs_weights'. Overriding weights='{weights}' with 'rcs_weights'.",
-                UserWarning,
-                stacklevel=2,
-            )
-        weight_col_name = "rcs_weights"
-
-    if implementation == "uk_shmi":
-        if weights and weights != "uk_shmi":
-            warnings.warn(
-                f"Implementation 'uk_shmi' requires 'uk_shmi_weights'. Overriding weights='{weights}' with 'uk_shmi_weights'.",
-                UserWarning,
-                stacklevel=2,
-            )
-        weight_col_name = "uk_shmi_weights"
+    # rcs/uk_shmi implementations always use their own matching weights
+    if implementation in ("rcs", "uk_shmi") and weights != implementation:
+        warnings.warn(
+            f"Implementation '{implementation}' requires '{implementation}_weights'. Overriding weights='{weights}' with '{implementation}_weights'.",
+            UserWarning,
+            stacklevel=2,
+        )
+        weights = implementation
+    weight_col_name = f"{weights}_weights"
 
     # Load definition and weight files
     base_path = Path(__file__).parent / "common"
@@ -215,8 +201,18 @@ def CharlsonComorbidityIndex(
     ):
         raise ValueError("Both definition and weight files must contain a 'category' column.") # fmt: skip
 
-    # Perform the join
-    df_combined = df_definitions.join(df_weights, on="category", how="left")
+    # Alias renamed categories to CHARLSON_WEIGHTS.csv's names for the weight
+    # lookup only; see CHARLSON_CATEGORY_ALIASES.yaml for the mapping
+    with open(base_path / "CHARLSON_CATEGORY_ALIASES.yaml") as f:
+        category_aliases = yaml.safe_load(f).get(implementation, {})
+
+    df_combined = (
+        df_definitions.with_columns(
+            pl.col("category").replace(category_aliases).alias("__weight_category__")
+        )
+        .join(df_weights.rename({"category": "__weight_category__"}), on="__weight_category__", how="left")
+        .drop("__weight_category__")
+    )
 
     # Define mutual exclusion rules for Charlson
     # These category names are common across Quan, Romano, Deyo

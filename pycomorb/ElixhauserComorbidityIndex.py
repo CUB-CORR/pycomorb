@@ -22,6 +22,7 @@ import warnings
 from pathlib import Path
 
 import polars as pl
+import yaml
 
 from .CustomComorbidityIndex import CustomComorbidityIndex
 
@@ -123,15 +124,9 @@ def ElixhauserComorbidityIndex(
     if implementation in ("ahrq_icd9", "ahrq_icd10") or weights == "ahrq":
         if icd_version not in ("icd9", "icd10"):
             raise ValueError("weights='ahrq' requires icd_version 'icd9' or 'icd10'.")
-        weight_col_name = "ahrq_icd9_weights" if icd_version == "icd9" else "ahrq_icd10_weights"
-    elif weights == "van_walraven":
-        weight_col_name = "van_walraven_weights"
-    elif weights == "thompson_30":
-        weight_col_name = "thompson_30_weights"
-    elif weights == "thompson_29":
-        weight_col_name = "thompson_29_weights"
-    elif weights == "swiss":
-        weight_col_name = "swiss_weights"
+        weight_col_name = f"ahrq_{icd_version}_weights"
+    else:
+        weight_col_name = f"{weights}_weights"
 
     # Load definition and weight files
     base_path = Path(__file__).parent / "common"
@@ -149,8 +144,17 @@ def ElixhauserComorbidityIndex(
     ):
         raise ValueError("Both definition and weight files must contain a 'category' column.") # fmt: skip
 
-    # Perform the join
-    df_combined = df_definitions.join(df_weights, on="category", how="left")
+    # Alias renamed categories to ELIXHAUSER_WEIGHTS.csv's names for the weight
+    # lookup only; see ELIXHAUSER_CATEGORY_ALIASES.yaml for the mapping
+    with open(base_path / "ELIXHAUSER_CATEGORY_ALIASES.yaml") as f:
+        category_aliases = yaml.safe_load(f).get(implementation, {})
+    df_combined = (
+        df_definitions.with_columns(
+            pl.col("category").replace(category_aliases).alias("__weight_category__")
+        )
+        .join(df_weights.rename({"category": "__weight_category__"}), on="__weight_category__", how="left")
+        .drop("__weight_category__")
+    )
 
     # Define mutual exclusion rules for Elixhauser
     # Category names must match this implementation's own definition file
