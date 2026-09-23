@@ -16,10 +16,16 @@
 # included, never-exempt ones just get the baseline year.
 
 import re
+import sys
 from pathlib import Path
 
-import polars as pl
-import yaml
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "utils"))
+from utils import (
+    contract_codes,
+    merge_weights,
+    parse_sas_value_block,
+    write_rows,
+)
 
 VERSION = "v2026-1"
 VERSION_DIR = f"CMR-{VERSION}"
@@ -35,59 +41,6 @@ ICDVER_YEAR = {
     33: 2016, 34: 2017, 35: 2018, 36: 2019, 37: 2020, 38: 2021, 39: 2022,
     40: 2023, 41: 2024, 42: 2025, 43: 2026,
 }  # fmt: skip
-
-
-# parse a SAS 'Value $NAME ... ;' PROC FORMAT body into {label: [codes]};
-# codes are enumerated individually (no dash-ranges), both quote styles are
-# accepted, even within the same block
-def parse_sas_value_block(text: str) -> dict[str, list[str]]:
-    text = re.sub(r"other\s*=\s*[\"'][^\"']*[\"']\s*;?", "", text, flags=re.IGNORECASE)
-    tokens = list(re.finditer(r"[\"']([^\"']*)[\"']", text))
-    groups: dict[str, list[str]] = {}
-    pending: list[str] = []
-    for i, token in enumerate(tokens):
-        value = token.group(1).strip()
-        preceding = text[tokens[i - 1].end() if i > 0 else 0 : token.start()]
-        if "=" in preceding:
-            groups.setdefault(value, []).extend(pending)
-            pending = []
-        else:
-            pending.append(value)
-    return groups
-
-
-# drop codes whose shorter ancestor prefix is already present, and collapse
-# complete digit-families (all 10 next-digit children of a prefix) into the
-# prefix (e.g. 5000|5001|...|5009 -> 500); repeats until stable
-def contract_codes(codes) -> set[str]:
-    codes = set(codes)
-    changed = True
-    while changed:
-        changed = False
-
-        ordered = sorted(codes, key=len)
-        kept: list[str] = []
-        for code in ordered:
-            if not any(code != k and code.startswith(k) for k in kept):
-                kept.append(code)
-        if len(kept) != len(codes):
-            codes, changed = set(kept), True
-
-        by_prefix: dict[str, set[str]] = {}
-        for code in codes:
-            if len(code) > 1:
-                by_prefix.setdefault(code[:-1], set()).add(code)
-        for prefix, group in by_prefix.items():
-            if {c[-1] for c in group} == set("0123456789"):
-                codes -= group
-                codes.add(prefix)
-                changed = True
-
-    return codes
-
-
-def write_rows(path: Path, columns: list[str], rows: list[tuple]) -> None:
-    pl.DataFrame(rows, schema=columns, orient="row").with_row_index("index").write_csv(path)
 
 
 def extract_value_block(text: str, name: str) -> str:
@@ -210,20 +163,15 @@ assert set(mortality) == set(categories), set(mortality) ^ set(categories)
 
 # renamed categories merge into their existing ELIXHAUSER_WEIGHTS.csv row;
 # only genuinely new categories (Liver/Renal/Neuro splits, Dementia, ...) get a new row
-with open("../ELIXHAUSER_CATEGORY_ALIASES.yaml") as f:
-    WEIGHT_ALIASES = yaml.safe_load(f)["ahrq_icd10"]
-
-existing = pl.read_csv(WEIGHTS_FILE).drop("index").to_dicts()
-by_category = {row["category"]: row for row in existing}
-order = [row["category"] for row in existing]
-for label in categories:
-    weight_category = WEIGHT_ALIASES.get(CATEGORY_NAMES[label], CATEGORY_NAMES[label])
-    row = by_category.setdefault(weight_category, {"category": weight_category})
-    row["ahrq_icd10_weights"] = int(mortality[label])
-    if weight_category not in order:
-        order.append(weight_category)
-pl.DataFrame([by_category[c] for c in order]).with_row_index("index").write_csv(WEIGHTS_FILE)
-order_index = {category: i for i, category in enumerate(order)}
+WEIGHT_ALIASES, order_index = merge_weights(
+    WEIGHTS_FILE,
+    Path("../ELIXHAUSER_CATEGORY_ALIASES.yaml"),
+    "ahrq_icd10",
+    "ahrq_icd10_weights",
+    categories,
+    CATEGORY_NAMES,
+    mortality,
+)
 
 BASELINE_YEAR = ICDVER_YEAR[33]
 rows: list[tuple[str, int, list[str]]] = []

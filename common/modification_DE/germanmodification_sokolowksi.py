@@ -1,11 +1,16 @@
-# 1. place a copy of https://github.com/fabiansiegel/comorbidity_score/ in this folder
-#    -> ships year-specific ICD-10-GM mapping JSONs in comorbidity_score_calc/mappings/
+# 1. clone https://github.com/fabiansiegel/comorbidity_score/ into this folder
+#    (ships year-specific ICD-10-GM mapping JSONs in comorbidity_score_calc/mappings/)
 # 2. run this script from this folder: python germanmodification_sokolowksi.py
 # 3. writes ../CHARLSON_SOKOLOWSKI.csv
 
 import json
+import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "utils"))
+from utils import contract_codes, write_rows
+
+# ICD-10-GM catalogue years covered by comorbidity_score's mapping JSONs
 years = range(2010, 2027)
 
 source_dir = Path("comorbidity_score/comorbidity_score_calc/mappings")
@@ -31,16 +36,17 @@ categories = {
     "malignancy_meta":    (16, "Metastatic solid tumor"),
     "aids":               (17, "AIDS/HIV"),
 } # fmt: skip
+# and_group key: liver_severe only counts when both its cause and organ-damage codes are present
 liver_severe_and_group = "liver_severe_and"
 
 
+# codes come dotted (e.g. 'I25.20'); the rest of pycomorb matches undotted prefixes
 def strip_dots(codes):
-    # codes come dotted (e.g. 'I25.20'); the rest of pycomorb matches undotted prefixes
     return {code.replace(".", "") for code in codes}
 
 
+# union of every 'any'-condition code group's flat code list
 def flatten_any_codes(category_def):
-    # union of every 'any'-condition code group's flat code list
     codes = set()
     for group in category_def["codes"]:
         if group["condition"] == "any":
@@ -48,8 +54,8 @@ def flatten_any_codes(category_def):
     return strip_dots(codes)
 
 
+# the two subgroup lists of the (single) 'both'-condition group, if any
 def flatten_both_subgroups(category_def):
-    # the two subgroup lists of the (single) 'both'-condition group, if any
     for group in category_def["codes"]:
         if group["condition"] == "both":
             cause, organ = group["codes"]
@@ -57,29 +63,20 @@ def flatten_both_subgroups(category_def):
     return set(), set()
 
 
-def contract(codes):
-    # drop any code that has a proper ancestor prefix already in the set
-    ordered = sorted(codes, key=len)
-    kept = []
-    for code in ordered:
-        if not any(code != k and code.startswith(k) for k in kept):
-            kept.append(code)
-    return set(kept)
-
-
+# load one year's ICD-10-GM code -> Charlson category mapping
 def load_year(year):
     with open(source_dir / f"charlson_icd10gm_{year}.json") as f:
         return json.load(f)["mapping"]
 
 
+# emit a row only where the contracted code set gains prefixes versus the previous year
 def changelog_rows(index, label, raw_by_year, and_group=None):
-    # emit a row only where the contracted code set gains prefixes versus the previous year
     rows = []
     cumulative_raw = set()
     previous_contracted = set()
     for year in years:
         cumulative_raw |= raw_by_year[year]
-        contracted = contract(cumulative_raw)
+        contracted = contract_codes(cumulative_raw)
         new_prefixes = contracted - previous_contracted
         if new_prefixes:
             rows.append((index, label, year, and_group, "|".join(sorted(new_prefixes))))
@@ -101,11 +98,13 @@ for key, (index, label) in categories.items():
         rows.extend(changelog_rows(index, label, cause_by_year, liver_severe_and_group))
         rows.extend(changelog_rows(index, label, organ_by_year, liver_severe_and_group))
 
+# group each category's changelog rows together, in year order
 rows.sort(key=lambda r: (r[0], r[2], r[3] or ""))
 
-with open(out_path, "w") as f:
-    f.write("index,category,year,and_group,icd9_codes,icd10_codes\n")
-    for index, label, year, and_group, codes in rows:
-        f.write(f"{index},{label},{year},{and_group or ''},,{codes}\n")
+write_rows(
+    out_path,
+    ["category", "year", "and_group", "icd9_codes", "icd10_codes"],
+    [(label, year, and_group, None, codes) for _, label, year, and_group, codes in rows],
+)
 
 print(f"Wrote {len(rows)} rows to {out_path}")

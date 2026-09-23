@@ -5,9 +5,11 @@
 # 3. writes ../CHARLSON_SWEDEN.csv
 
 import re
+import sys
 from pathlib import Path
 
-import polars as pl
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "utils"))
+from utils import contract_codes, write_rows
 
 SOURCE_FILE = "Charlson-comorbidity-index-revisited/Charlson_SAS"
 OUT_PATH = Path("../CHARLSON_SWEDEN.csv")
@@ -33,16 +35,6 @@ CATEGORIES = {
     "metastatic_cancer":     (17, "Metastatic cancer"),
     "aids":                  (18, "AIDS/HIV"),
 } # fmt: skip
-
-
-# drop any code whose shorter ancestor prefix is already present
-def contract_codes(codes) -> set[str]:
-    ordered = sorted(set(codes), key=len)
-    kept: list[str] = []
-    for code in ordered:
-        if not any(code != k and code.startswith(k) for k in kept):
-            kept.append(code)
-    return set(kept)
 
 
 # slice text between marker and next_marker, or the block's closing END; if next_marker is omitted
@@ -72,21 +64,21 @@ categories_by_version = {
     "icd10_codes": parse_categories(extract_section(text, "*--- ICD10 ---*;")),
 }
 
-rows = [(0, "Age", "XXXX|XXXX", "YYYY|YYYY")]
-for name, (index, label) in sorted(CATEGORIES.items(), key=lambda kv: kv[1][0]):
+categories_sorted = sorted(CATEGORIES.items(), key=lambda kv: kv[1][0])
+
+# CATEGORIES is a contiguous 1..N, so write_rows' row position matches it
+rows = [("Age", "XXXX|XXXX", "YYYY|YYYY")]
+for name, (index, label) in categories_sorted:
     rows.append((
-        index,
         label,
         "|".join(sorted(contract_codes(categories_by_version["icd9_codes"][name]))),
         "|".join(sorted(contract_codes(categories_by_version["icd10_codes"][name]))),
     ))
 
-pl.DataFrame(
-    rows, schema=["index", "category", "icd9_codes", "icd10_codes"], orient="row"
-).write_csv(OUT_PATH)
+write_rows(OUT_PATH, ["category", "icd9_codes", "icd10_codes"], rows)
 
 print(f"Wrote {len(rows)} rows ({len(CATEGORIES)} categories) to {OUT_PATH}")
-for name, (index, label) in sorted(CATEGORIES.items(), key=lambda kv: kv[1][0]):
+for name, (index, label) in categories_sorted:
     n9 = len(categories_by_version["icd9_codes"][name])
     n10 = len(categories_by_version["icd10_codes"][name])
     print(f"  {label:55s} {n9:3d} ICD-9 codes, {n10:3d} ICD-10 codes")
