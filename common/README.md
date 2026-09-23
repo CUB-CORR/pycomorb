@@ -34,6 +34,8 @@ The following variants are also added:
     - Any malignancy, including lymphoma and leukemia, except malignant neoplasm of skin -> Cancer
     - Metastatic solid tumor -> Metastatic cancer
     - AIDS/HIV -> HIV
+- **Denmark** (ICD-10 only):<br>Thygesen SK, Christiansen CF, Christensen S, Lash TL, Sørensen HT. The predictive value of ICD-10 diagnostic coding used to assess Charlson comorbidity index conditions in the population-based Danish National Registry of Patients. BMC Med Res Methodol. 2011 Dec;11(1):83. doi: [10.1186/1471-2288-11-83](https://doi.org/10.1186/1471-2288-11-83).
+  - Keeps `Any tumor`, `Leukemia`, and `Lymphoma` as three separate categories, per its own ICD-10 coding, rather than the merged `Any malignancy`.
 - **Sweden** (CAVE: currently only the ICD-10 version is implemented):<br>Ludvigsson JF, Appelros P, Askling J, Byberg L, Carrero JJ, Ekström AM, Ekström M, Smedby KE, Hagström H, James S, Järvholm B, Michaelsson K, Pedersen NL, Sundelin H, Sundquist K, Sundström J. Adaptation of the Charlson Comorbidity Index for Register-Based Research in Sweden. Clin Epidemiol. 2021 Jan 12;13:21-41. doi: [10.2147/CLEP.S282475](http://doi.org/10.2147/CLEP.S282475). Erratum in: Clin Epidemiol. 2023 Jun 19;15:753-754. doi: [http://doi.org/10.2147/CLEP.S425901](http://doi.org/10.2147/CLEP.S425901). PMID: 33469380; PMCID: PMC7812935.
   - The categories are renamed / split the following way:
     - Chronic pulmonary disease -> Chronic obstructive pulmonary disease (COPD) _and_ Other chronic pulmonary disease

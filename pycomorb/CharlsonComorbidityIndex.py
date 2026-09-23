@@ -25,6 +25,10 @@
 #    Identifying co-morbidity in surgical patients using administrative data with the Royal College of Surgeons Charlson Score.
 #    Br J Surg. 2010 May;97(5):772-81.
 #    doi: 10.1002/bjs.6930. PMID: 20306528.
+# 8. Thygesen SK, Christiansen CF, Christensen S, Lash TL, Sørensen HT.
+#    The predictive value of ICD-10 diagnostic coding used to assess Charlson comorbidity index conditions in the population-based Danish National Registry of Patients.
+#    BMC Med Res Methodol. 2011 Dec;11(1):83.
+#    doi: 10.1186/1471-2288-11-83.
 
 import warnings
 from pathlib import Path
@@ -60,7 +64,7 @@ def CharlsonComorbidityIndex(
         icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd10"``.
         icd_version_col (str, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``. Defaults to ``None``.
         year_col (str, optional): Column name with each record's ICD-10-GM catalogue year. Required when ``implementation`` is ``"sokolowski"`` (ignored otherwise), since that mapping is year-specific. Defaults to ``None``.
-        implementation (str, optional): Definition set to use; ``"quan"``, ``"deyo"``, ``"romano"``, ``"dhoore"``, ``"australia"``, ``"sweden"``, ``"rcs"``, ``"uk_shmi"``, or ``"sokolowski"``. Defaults to ``"quan"``.
+        implementation (str, optional): Definition set to use; ``"quan"``, ``"deyo"``, ``"romano"``, ``"dhoore"``, ``"australia"``, ``"sweden"``, ``"rcs"``, ``"uk_shmi"``, ``"sokolowski"``, or ``"thygesen"``. Defaults to ``"quan"``.
         weights (str, optional): Weighting scheme. For Charlson, weights are determined by the implementation; this parameter is accepted for API consistency. Defaults to ``None``.
         return_categories (bool, optional): If ``True``, includes indicator columns for each CCI category. Defaults to ``False``.
 
@@ -84,12 +88,13 @@ def CharlsonComorbidityIndex(
             stacklevel=2,
         )
         icd_version = "icd9"
-    # Change ICD to ICD-10 for Australian, UK and Sokołowski versions
+    # Change ICD to ICD-10 for Australian, UK, Sokołowski and Thygesen versions
     elif icd_version in ("icd9", "icd9_10") and implementation in [
         "australia",
         "rcs",
         "uk_shmi",
         "sokolowski",
+        "thygesen",
     ]:
         warnings.warn(
             f"Implementation '{implementation}' only uses ICD-10. Setting ICD version to 'icd10'.",
@@ -109,7 +114,8 @@ def CharlsonComorbidityIndex(
         "rcs",
         "uk_shmi",
         "sokolowski",
-    ], "implementation must be one of: 'quan', 'deyo', 'romano', 'dhoore', 'australia', 'sweden', 'rcs', 'uk_shmi', or 'sokolowski'."
+        "thygesen",
+    ], "implementation must be one of: 'quan', 'deyo', 'romano', 'dhoore', 'australia', 'sweden', 'rcs', 'uk_shmi', 'sokolowski', or 'thygesen'."
     assert weights in [
         "charlson",
         "quan",
@@ -169,6 +175,8 @@ def CharlsonComorbidityIndex(
         definition_file = "CHARLSON_UK_SHMI_v1.55.csv"
     elif implementation == "sokolowski":
         definition_file = "CHARLSON_SOKOLOWSKI.csv"
+    elif implementation == "thygesen":
+        definition_file = "CHARLSON_THYGESEN.csv"
     else:
         # Should be caught by assert earlier
         raise ValueError(f"Unsupported implementation: {implementation}")

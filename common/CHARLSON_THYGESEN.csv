@@ -1,0 +1,21 @@
+index,category,icd9_codes,icd10_codes
+0,Age,,YYYY|YYYY
+1,Myocardial infarction,,I21|I22|I23
+2,Congestive heart failure,,I50|I110|I130|I132
+3,Peripheral vascular disease,,I70|I71|I72|I73|I74|I77
+4,Cerebrovascular disease,,I6|G45|G46
+5,Dementia,,F00|F01|F02|F03|F051|G30
+6,Chronic pulmonary disease,,J40|J41|J42|J43|J44|J45|J46|J47|J60|J61|J62|J63|J64|J65|J66|J67|J684|J701|J703|J841|J920|J961|J982|J983
+7,Rheumatic disease,,M05|M06|M08|M09|M30|M31|M32|M33|M34|M35|M36|D86
+8,Peptic ulcer disease,,K221|K25|K26|K27|K28
+9,Mild liver disease,,B18|K700|K701|K702|K703|K709|K71|K73|K74|K760
+10,Diabetes without chronic complication,,E100|E101|E109|E110|E111|E119
+11,Diabetes with chronic complication,,E102|E103|E104|E105|E106|E107|E108|E112|E113|E114|E115|E116|E117|E118
+12,Hemiplegia or paraplegia,,G81|G82
+13,Renal disease,,I12|I13|N00|N01|N02|N03|N04|N05|N07|N11|N14|N17|N18|N19|Q61
+14,Any tumor,,C0|C1|C2|C3|C4|C5|C6|C70|C71|C72|C73|C74|C75
+15,Leukemia,,C91|C92|C93|C94|C95
+16,Lymphoma,,C81|C82|C83|C84|C85|C88|C90|C96
+17,Moderate or severe liver disease,,B150|B160|B162|B190|K704|K72|K766|I85
+18,Metastatic solid tumor,,C76|C77|C78|C79|C80
+19,AIDS/HIV,,B21|B22|B23|B24

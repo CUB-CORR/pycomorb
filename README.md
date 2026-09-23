@@ -23,7 +23,7 @@ See [common/README.md](https://github.com/CUB-CORR/pycomorb/blob/main/src/pycomo
 
 ### Charlson Comorbidity Index
 
-Categories are: `Myocardial infarction`, `Congestive heart failure`, `Peripheral vascular disease`, `Cerebrovascular disease`, `Dementia`, `Chronic pulmonary disease`, `Rheumatic disease`, `Peptic ulcer disease`, `Mild liver disease`, `Diabetes without chronic complication`, `Diabetes with chronic complication`, `Hemiplegia or paraplegia`, `Renal disease`, `Any malignancy, including lymphoma and leukemia, except malignant neoplasm of skin`, `Moderate or severe liver disease`, `Metastatic solid tumor`, `AIDS/HIV`.
+Categories are: `Myocardial infarction`, `Congestive heart failure`, `Peripheral vascular disease`, `Cerebrovascular disease`, `Dementia`, `Chronic pulmonary disease`, `Rheumatic disease`, `Peptic ulcer disease`, `Mild liver disease`, `Diabetes without chronic complication`, `Diabetes with chronic complication`, `Hemiplegia or paraplegia`, `Renal disease`, `Any malignancy, including lymphoma and leukemia, except malignant neoplasm of skin`, `Moderate or severe liver disease`, `Metastatic solid tumor`, `AIDS/HIV`. The Danish/Thygesen variant instead keeps `Any tumor`, `Leukemia`, and `Lymphoma` as three separate categories, as in the original 1987 Charlson paper.
 
 - **Mappings**:
   - Quan et al. 2005 ([Quan 2005](https://doi.org/10.1097/01.mlr.0000182534.19832.83))

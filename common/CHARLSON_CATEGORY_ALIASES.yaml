@@ -1,4 +1,17 @@
 # Category renames vs. CHARLSON_WEIGHTS.csv's canonical names, by implementation.
+quan:
+  Any malignancy, including lymphoma and leukemia, except malignant neoplasm of skin: Any malignancy
+deyo:
+  Any malignancy, including lymphoma and leukemia: Any malignancy
+dhoore:
+  Any malignancy, including lymphoma and leukemia: Any malignancy
+romano:
+  Any malignancy, including lymphoma and leukemia: Any malignancy
+thygesen:
+  # same charlson_weights=2 as the merged category, so no separate row needed
+  Any tumor: Any malignancy
+  Leukemia: Any malignancy
+  Lymphoma: Any malignancy
 australia:
   Connective tissue disorder: Rheumatic disease
   Diabetes: Diabetes without chronic complication
