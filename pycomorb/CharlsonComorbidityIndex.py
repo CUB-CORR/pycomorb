@@ -31,6 +31,7 @@
 #    doi: 10.1186/1471-2288-11-83.
 
 import warnings
+from itertools import product
 from pathlib import Path
 
 import polars as pl
@@ -221,35 +222,23 @@ def CharlsonComorbidityIndex(
         .drop("__weight_category__")
     )
 
-    # Define mutual exclusion rules for Charlson
-    # These category names are common across Quan, Romano, Deyo
-    mutual_exclusion_rules = [
+    # Mutual exclusion: if both categories of a pair are present, only the first
+    # (more severe) is counted. Rules use canonical names, mapped to each
+    # implementation's own names via its aliases.
+    canonical_rules = [
         ("Diabetes with chronic complication", "Diabetes without chronic complication"),
         ("Moderate or severe liver disease", "Mild liver disease"),
-    ] # fmt: skip
-    # Adjust rules for specific implementations if category names differ
-    if implementation == "australia":
-        mutual_exclusion_rules = [
-            ("Diabetes complications", "Diabetes"),
-            ("Moderate or severe liver disease", "Mild liver disease"),
-        ]
-    elif implementation == "uk_shmi":
-        mutual_exclusion_rules = [
-            ("Diabetes complications", "Diabetes"),
-            ("Severe liver disease", "Liver disease"),
-        ]
-    elif implementation == "sweden":
-        mutual_exclusion_rules = [
-            ("Diabetes with end organ damage", "Diabetes"),
-            # Sweden uses 'Moderate or severe kidney disease' - no specific liver exclusion rule needed based on provided names
-            # Sweden splits Pulmonary disease - no exclusion needed between them
-        ]
-    elif implementation == "sokolowski":
-        mutual_exclusion_rules = [
-            ("Moderate or severe liver disease", "Mild liver disease"),
-            ("Metastatic solid tumor", "Any malignancy"),
-            ("Diabetes with chronic complication", "Diabetes without chronic complication"),
-        ] # fmt: skip
+        ("Metastatic solid tumor", "Any malignancy"),
+        # Sweden splits Chronic pulmonary disease - no exclusion needed between them,
+        # the Swedish SAS code sums "copd" and "other_cpd" (weight 1 each).
+    ]
+    # own category name -> canonical name
+    canonical = {c: category_aliases.get(c, c) for c in df_combined["category"]}
+    mutual_exclusion_rules = [
+        (severe, mild)
+        for severe, mild in product(canonical, repeat=2)
+        if (canonical[severe], canonical[mild]) in canonical_rules
+    ]
 
     df_charlson = CustomComorbidityIndex(
         df=df,

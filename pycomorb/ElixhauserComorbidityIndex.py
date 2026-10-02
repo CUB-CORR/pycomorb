@@ -19,6 +19,7 @@
 #    https://hcup-us.ahrq.gov/toolssoftware/comorbidityicd10/comorbidity_icd10.jsp#down (implementation='ahrq_icd10')
 
 import warnings
+from itertools import product
 from pathlib import Path
 
 import polars as pl
@@ -156,25 +157,27 @@ def ElixhauserComorbidityIndex(
         .drop("__weight_category__")
     )
 
-    # Define mutual exclusion rules for Elixhauser
-    # Category names must match this implementation's own definition file
-    if implementation == "ahrq_icd9":
-        mutual_exclusion_rules = [
-            ("Diabetes with chronic complications", "Diabetes without chronic complications"),
-        ]
-    elif implementation == "ahrq_icd10":
-        # Liver/Renal severe-suppresses-mild matches AHRQ's own CMR_Mapping_Program
-        mutual_exclusion_rules = [
-            ("Diabetes with chronic complications", "Diabetes without chronic complications"),
-            ("Hypertension, complicated", "Hypertension, uncomplicated"),
-            ("Liver disease, moderate to severe", "Liver disease, mild"),
-            ("Renal failure, severe", "Renal failure, moderate"),
-        ]
-    else:
-        mutual_exclusion_rules = [
-            ("Diabetes complicated", "Diabetes uncomplicated"),
-            ("Hypertension complicated", "Hypertension uncomplicated"),
-        ]
+    # Mutual exclusion: if both categories of a pair are present, only the first
+    # (more severe) is counted. Rules use canonical names, mapped to each
+    # implementation's own names via its aliases.
+    canonical_rules = [
+        # --- general: every implementation has these tiers ---
+        ("Diabetes complicated", "Diabetes uncomplicated"),
+        ("Hypertension complicated", "Hypertension uncomplicated"),
+        ("Metastatic cancer", "Solid tumor without metastasis"),
+        # --- subset: only ahrq_icd10 has these tiers (severity levels, in-situ tumors) ---
+        ("Liver disease, moderate to severe", "Liver disease"),
+        ("Renal failure, severe", "Renal failure"),
+        ("Metastatic cancer", "Solid tumor without metastasis, in situ"),
+        ("Solid tumor without metastasis", "Solid tumor without metastasis, in situ"),
+    ]
+    # own category name -> canonical name
+    canonical = {c: category_aliases.get(c, c) for c in df_combined["category"]}
+    mutual_exclusion_rules = [
+        (severe, mild)
+        for severe, mild in product(canonical, repeat=2)
+        if (canonical[severe], canonical[mild]) in canonical_rules
+    ]
 
     # Call the generalized function with the combined DataFrame
     df_elixhauser = CustomComorbidityIndex(

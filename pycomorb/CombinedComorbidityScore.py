@@ -58,10 +58,11 @@ def CombinedComorbidityScore(
     definition_file_path = Path(__file__).parent / "common" / definition_file
     weight_col_name = "weights"
 
-    # Define mutual exclusion rules for combined score
-    mutual_exclusion_rules = [
-        ("Complicated diabetes", "Uncomplicated diabetes")
-    ]
+    # No mutual exclusion rules:
+    # - the published Gagne SAS code treats "Any tumor" (1) and "Metastatic cancer" (5)
+    #   as independent flags and sums both.
+    # - uncomplicated diabetes has weight 0 (and is not considered in the SAS code),
+    #   so complicated diabetes does not need to suppress it.
 
     # Call the generalized function
     df_ccs = CustomComorbidityIndex(
@@ -73,7 +74,6 @@ def CombinedComorbidityScore(
         definition_data=definition_file_path,
         weight_col_name=weight_col_name,
         score_col_name=SCORE_COL_NAME,
-        mutual_exclusion_rules=mutual_exclusion_rules,
         return_categories=return_categories,
     )
 
