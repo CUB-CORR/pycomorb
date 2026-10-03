@@ -3,7 +3,7 @@ index,category,icd9_codes,icd10_codes
 1,Myocardial infarction,,I21|I22|I23|I252
 2,Congestive heart failure,,I11|I13|I255|I42|I43|I50|I517
 3,Peripheral vascular disease,,I70|I71|I72|I73|I770|I771|K551|K558|K559|R02|Z958|Z959
-4,Cerebrovascular disease,,G45|G46|I60|I61|I62|I63|I65|I66|I67|I68|I69
+4,Cerebrovascular disease,,G45|G46|I60|I61|I62|I63|I64|I65|I66|I67|I68|I69
 5,Dementia,,A810|F00|F01|F02|F03|F051|G30|G31
 6,Chronic pulmonary disease,,I26|I27|J40|J41|J42|J44|J43|J45|J46|J47|J60|J61|J62|J63|J66|J64|J65|J66|J67|J684|J701|J703
 7,Rheumatological disease,,M05|M06|M09|M120|M315|M32|M33|M34|M35|M36

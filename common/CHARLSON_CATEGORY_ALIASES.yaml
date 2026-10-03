@@ -18,6 +18,10 @@ australia:
   Diabetes complications: Diabetes with chronic complication
   Paraplegia: Hemiplegia or paraplegia
   Cancer: Any malignancy
+rcs:
+  Rheumatological disease: Rheumatic disease
+  Liver disease: Mild liver disease
+  Diabetes: Diabetes without chronic complication
 sweden:
   Chronic obstructive pulmonary disease (COPD): Chronic pulmonary disease
   Other chronic pulmonary disease: Chronic pulmonary disease

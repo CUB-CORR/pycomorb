@@ -258,6 +258,10 @@ def CharlsonComorbidityIndex(
         df_charlson = df_charlson.with_columns(pl.col(SCORE_COL_NAME).clip(lower_bound=0))
 
     # STEP 3: Combine Age Score and Comorbidity Score
+    # RCS Charlson is a simple count of conditions, without an age component
+    if weights == "rcs":
+        age_scores = age_scores.with_columns(pl.lit(0).alias("Age Score"))
+
     df_charlson = df_charlson.join(
         age_scores, on=id_col, how="left", coalesce=True
     ).with_columns(
