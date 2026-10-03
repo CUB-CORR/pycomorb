@@ -19,7 +19,7 @@ As a special feature, it also implements the history of the German Modification 
 
 ## Supported Variants
 
-See [common/README.md](https://github.com/CUB-CORR/pycomorb/blob/main/src/pycomorb/common/README.md) for more details and references.
+See [common/README.md](https://github.com/CUB-CORR/pycomorb/blob/main/common/README.md) for more details and references.
 
 ### Charlson Comorbidity Index
 

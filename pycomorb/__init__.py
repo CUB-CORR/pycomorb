@@ -138,7 +138,7 @@ def comorbidity(
             icd_version_col=icd_version_col,
             year_col=year_col,
             implementation=implementation or "quan",
-            weights=weights,
+            weights=weights or "charlson",
             return_categories=return_categories,
         )
     elif score in (
@@ -153,6 +153,7 @@ def comorbidity(
             code_col=code_col,
             icd_version=icd_version,
             icd_version_col=icd_version_col,
+            year_col=year_col,
             implementation=implementation or "quan",
             weights=weights or "van_walraven",
             return_categories=return_categories,
