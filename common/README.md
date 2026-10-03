@@ -47,7 +47,7 @@ The following variants are also added:
     - Any malignancy, including lymphoma and leukemia, except malignant neoplasm of skin -> Any malignancy, including lymphoma and leukemia
     - Metastatic solid tumor -> Metastatic cancer
 - **UK**  (ICD-10 only):<br>[Summary Hospital-level Mortality Indicator (SHMI)](https://digital.nhs.uk/data-and-information/publications/statistical/shmi)
-  - The SHMI ICD code mappings may be downloaded under the heading `Resources` -> `Methodology specifications`. The implementation is currently on Version 1.55 (March 2025 — "Deaths associated with hospitalisation, England, December 2023 - November 2024")
+  - The SHMI ICD code mappings may be downloaded under the heading `Resources` -> `Methodology specifications`. The implementation is currently on [Version 1.60 (June 2026)](https://files.digital.nhs.uk/F9/B8CD11/SHMI%20specification%20v1.60.pdf).
   - The categories are renamed within the SHMI the following way:
       1. Myocardial infarction -> Acute myocardial infarction
       4. Cerebrovascular disease -> Cerebral vascular accident

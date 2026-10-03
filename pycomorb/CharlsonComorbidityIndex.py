@@ -172,7 +172,7 @@ def CharlsonComorbidityIndex(
     elif implementation == "rcs":
         definition_file = "CHARLSON_RCS.csv"
     elif implementation == "uk_shmi":
-        definition_file = "CHARLSON_UK_SHMI_v1.55.csv"
+        definition_file = "CHARLSON_UK_SHMI_v1.60.csv"
     elif implementation == "sokolowski":
         definition_file = "CHARLSON_SOKOLOWSKI.csv"
     elif implementation == "thygesen":
@@ -252,6 +252,10 @@ def CharlsonComorbidityIndex(
         mutual_exclusion_rules=mutual_exclusion_rules,
         return_categories=return_categories,
     )
+
+    # UK SHMI: a negative Charlson Comorbidity Index is assigned a value of zero
+    if weights == "uk_shmi":
+        df_charlson = df_charlson.with_columns(pl.col(SCORE_COL_NAME).clip(lower_bound=0))
 
     # STEP 3: Combine Age Score and Comorbidity Score
     df_charlson = df_charlson.join(
