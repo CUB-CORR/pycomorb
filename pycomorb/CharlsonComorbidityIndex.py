@@ -8,27 +8,52 @@
 #    J Clin Epidemiol. 1994 Nov;47(11):1245-51.
 #    doi: 10.1016/0895-4356(94)90129-5. PMID: 7722560.
 #
-# Reference for ICD-9-CM and ICD-10 Coding Algorithms for Charlson Comorbidities:
-# 3. Deyo RA, Cherkin DC, Ciol MA.
+# Reference for ICD Coding Algorithms for Charlson Comorbidities (implementation=...):
+# 3. Deyo RA, Cherkin DC, Ciol MA. (ICD-9-CM; 'deyo')
 #    Adapting a clinical comorbidity index for use with ICD-9-CM administrative databases.
 #    J Clin Epidemiol. 1992 Jun;45(6):613-9.
 #    doi: 10.1016/0895-4356(92)90133-8. PMID: 1607900.
-# 4. Romano PS, Roos LL, Jollis JG.
+# 4. Romano PS, Roos LL, Jollis JG. (ICD-9-CM; 'romano')
 #    Adapting a clinical comorbidity index for use with ICD-9-CM administrative data: differing perspectives.
 #    J Clin Epidemiol. 1993 Oct;46(10):1075-9; discussion 1081-90.
 #    doi: 10.1016/0895-4356(93)90103-8. PMID: 8410092.
-# 5. Quan H, Sundararajan V, Halfon P, Fong A, Burnand B, Luthi JC, Saunders LD, Beck CA, Feasby TE, Ghali WA.
+# 5. D'Hoore W, Bouckaert A, Tilquin C. (ICD-9-CM; 'dhoore')
+#    Practical considerations on the use of the Charlson comorbidity index with administrative data bases.
+#    J Clin Epidemiol. 1996 Dec;49(12):1429-33.
+#    doi: 10.1016/s0895-4356(96)00271-5. PMID: 8991959.
+# 6. Sundararajan V, Henderson T, Perry C, Muggivan A, Quan H, Ghali WA. (ICD-10-AM; 'australia')
+#    New ICD-10 version of the Charlson comorbidity index predicted in-hospital mortality.
+#    J Clin Epidemiol. 2004 Dec;57(12):1288-94.
+#    doi: 10.1016/j.jclinepi.2004.03.012. PMID: 15617955.
+# 7. Quan H, Sundararajan V, Halfon P, Fong A, Burnand B, Luthi JC, Saunders LD, Beck CA, Feasby TE, Ghali WA. (ICD-9-CM and ICD-10; 'quan')
 #    Coding algorithms for defining comorbidities in ICD-9-CM and ICD-10 administrative data.
 #    Med Care. 2005 Nov;43(11):1130-9.
 #    doi: 10.1097/01.mlr.0000182534.19832.83. PMID: 16224307.
-# 7. Armitage JN, van der Meulen JH; Royal College of Surgeons Co-morbidity Consensus Group.
+# 8. Armitage JN, van der Meulen JH; Royal College of Surgeons Co-morbidity Consensus Group. (ICD-10; 'rcs')
 #    Identifying co-morbidity in surgical patients using administrative data with the Royal College of Surgeons Charlson Score.
 #    Br J Surg. 2010 May;97(5):772-81.
 #    doi: 10.1002/bjs.6930. PMID: 20306528.
-# 8. Thygesen SK, Christiansen CF, Christensen S, Lash TL, Sørensen HT.
+# 9. Thygesen SK, Christiansen CF, Christensen S, Lash TL, Sørensen HT. (ICD-10; 'thygesen')
 #    The predictive value of ICD-10 diagnostic coding used to assess Charlson comorbidity index conditions in the population-based Danish National Registry of Patients.
-#    BMC Med Res Methodol. 2011 Dec;11(1):83.
-#    doi: 10.1186/1471-2288-11-83.
+#    BMC Med Res Methodol. 2011 May 28;11:83.
+#    doi: 10.1186/1471-2288-11-83. PMID: 21619668; PMCID: PMC3125388.
+# 10. Ludvigsson JF, Appelros P, Askling J, Byberg L, Carrero JJ, Ekström AM, Ekström M, Smedby KE, Hagström H, James S, Järvholm B, Michaelsson K, Pedersen NL, Sundelin H, Sundquist K, Sundström J. (ICD-9 [Swedish] and ICD-10; 'sweden')
+#     Adaptation of the Charlson Comorbidity Index for Register-Based Research in Sweden.
+#     Clin Epidemiol. 2021 Jan 12;13:21-41.
+#     doi: 10.2147/CLEP.S282475. PMID: 33469380; PMCID: PMC7812935.
+# 11. NHS Digital. Summary Hospital-level Mortality Indicator (SHMI) specification v1.60, June 2026. (ICD-10; 'uk_shmi')
+#     https://digital.nhs.uk/data-and-information/publications/statistical/shmi
+# 12. Sokołowski PP, Hagmann M, Maros ME, Kamdje Wabo G, Meerjanssen JM, Siegel F. (ICD-10-GM; 'sokolowski')
+#     Developing Country-Specific Charlson Comorbidity Index Mappings for Use With German Administrative Data: Methodological Comparative Study.
+#     JMIR Med Inform. 2026 Sep 3;14:e93923.
+#     doi: 10.2196/93923. PMID: 42593349; PMCID: PMC13586706.
+#
+# Reference for Charlson weights (weights=...):
+# 13. Quan H, Li B, Couris CM, Fushimi K, Graham P, Hider P, Januel JM, Sundararajan V. ('quan')
+#     Updating and validating the Charlson comorbidity index and score for risk adjustment in hospital discharge abstracts using data from 6 countries.
+#     Am J Epidemiol. 2011 Mar 15;173(6):676-82.
+#     doi: 10.1093/aje/kwq433. Epub 2011 Feb 17. PMID: 21330339.
+# ('charlson' = ref. 1, 'rcs' = ref. 8, 'uk_shmi' = ref. 11)
 
 import warnings
 from itertools import product
