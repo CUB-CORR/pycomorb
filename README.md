@@ -38,6 +38,7 @@ Categories are: `Myocardial infarction`, `Congestive heart failure`, `Peripheral
   - Germany, Sokołowski et al. 2026 ([Sokołowski 2026](https://doi.org/10.2196/93923)) – ICD-10-GM (year-specific; requires `year_col`) (`implementation="sokolowski"`)
 - **Weights**:
   - Charlson et al. 1987 ([Charlson 1987](https://doi.org/10.1016/0021-9681(87)90171-8)) (`weights="charlson"`)
+  - Schneeweiss et al. 2003 ([Schneeweiss 2003](https://doi.org/10.1111/1475-6773.00165)) (`weights="schneeweiss"`)
   - RCS, Armitage and van der Meulen 2010 ([Armitage & van der Meulen 2010](https://doi.org/10.1002/bjs.6930)) (`weights="rcs"`)
   - Quan et al. 2011 ([Quan 2011](https://doi.org/10.1093/aje/kwq433)) (`weights="quan"`)
   - UK SHMI, NHS Digital v1.60 (June 2026) (negative totals are floored at zero) (`weights="uk_shmi"`)

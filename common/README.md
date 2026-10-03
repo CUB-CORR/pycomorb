@@ -67,6 +67,7 @@ Original index:
 ## Weights (sorted by year)
 
 - **Charlson et al. 1987** (`weights="charlson"`): see the original index above
+- **Schneeweiss et al. 2003** (`weights="schneeweiss"`):<br>Schneeweiss S, Wang PS, Avorn J, Glynn RJ. Improved comorbidity adjustment for predicting mortality in Medicare populations. Health Serv Res. 2003 Aug;38(4):1103-20. doi: [10.1111/1475-6773.00165](https://doi.org/10.1111/1475-6773.00165). PMID: 12968819; PMCID: PMC1360935
 - **RCS, Armitage and van der Meulen 2010** (`weights="rcs"`): see the RCS mapping above
   - "each disease category is given an equal weight in the RCS Charlson Score, as it was designed to be used as a simple count of co-morbid conditions"
   - consequently, categories not included in the RCS mapping and the age score have no weight (i.e., age is not part of the RCS score)

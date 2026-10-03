@@ -49,7 +49,11 @@
 #     doi: 10.2196/93923. PMID: 42593349; PMCID: PMC13586706.
 #
 # Reference for Charlson weights (weights=...):
-# 13. Quan H, Li B, Couris CM, Fushimi K, Graham P, Hider P, Januel JM, Sundararajan V. ('quan')
+# 13. Schneeweiss S, Wang PS, Avorn J, Glynn RJ. ('schneeweiss')
+#     Improved comorbidity adjustment for predicting mortality in Medicare populations.
+#     Health Serv Res. 2003 Aug;38(4):1103-20.
+#     doi: 10.1111/1475-6773.00165. PMID: 12968819; PMCID: PMC1360935.
+# 14. Quan H, Li B, Couris CM, Fushimi K, Graham P, Hider P, Januel JM, Sundararajan V. ('quan')
 #     Updating and validating the Charlson comorbidity index and score for risk adjustment in hospital discharge abstracts using data from 6 countries.
 #     Am J Epidemiol. 2011 Mar 15;173(6):676-82.
 #     doi: 10.1093/aje/kwq433. Epub 2011 Feb 17. PMID: 21330339.
@@ -91,7 +95,7 @@ def CharlsonComorbidityIndex(
         icd_version_col (str, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``. Defaults to ``None``.
         year_col (str, optional): Column name with each record's ICD-10-GM catalogue year. Required when ``implementation`` is ``"sokolowski"`` (ignored otherwise), since that mapping is year-specific. Defaults to ``None``.
         implementation (str, optional): Definition set to use; ``"quan"``, ``"deyo"``, ``"romano"``, ``"dhoore"``, ``"australia"``, ``"sweden"``, ``"rcs"``, ``"uk_shmi"``, ``"sokolowski"``, or ``"thygesen"``. Defaults to ``"quan"``.
-        weights (str, optional): Weighting scheme. For Charlson, weights are determined by the implementation; this parameter is accepted for API consistency. Defaults to ``None``.
+        weights (str, optional): Weighting scheme; one of ``"charlson"``, ``"schneeweiss"``, ``"rcs"``, ``"quan"``, or ``"uk_shmi"``. The ``"rcs"`` and ``"uk_shmi"`` implementations always use their own weights. Defaults to ``"charlson"``.
         return_categories (bool, optional): If ``True``, includes indicator columns for each CCI category. Defaults to ``False``.
 
     Returns:
@@ -144,10 +148,11 @@ def CharlsonComorbidityIndex(
     ], "implementation must be one of: 'quan', 'deyo', 'romano', 'dhoore', 'australia', 'sweden', 'rcs', 'uk_shmi', 'sokolowski', or 'thygesen'."
     assert weights in [
         "charlson",
-        "quan",
+        "schneeweiss",
         "rcs",
+        "quan",
         "uk_shmi",
-    ], "weights must be one of: 'charlson', 'quan', 'rcs', or 'uk_shmi'."
+    ], "weights must be one of: 'charlson', 'schneeweiss', 'rcs', 'quan', or 'uk_shmi'."
     assert age_col in df.columns, f"Column '{age_col}' (age) must be present in input DataFrame." # fmt: skip
     if implementation == "sokolowski":
         assert year_col is not None and year_col in df.columns, "Implementation 'sokolowski' requires a 'year_col' column (ICD-10-GM catalogue year) in the input DataFrame." # fmt: skip
