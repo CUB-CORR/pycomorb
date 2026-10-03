@@ -5,8 +5,10 @@
 #    doi: 10.1016/j.jclinepi.2010.10.004. Epub 2011 Jan 5. PMID: 21208778; PMCID: PMC3100405.
 #
 # Reference for source ICD-9-CM Coding Algorithms:
+# (the ICD-9-CM mapping combines the Charlson conditions as mapped by Romano (2)
+#  and the Elixhauser conditions as mapped by Quan (3))
 # 2. Romano PS, Roos LL, Jollis JG.
-#    Adapting a clinical comorbidity index for use with ICD-9-CM administrative databases.
+#    Adapting a clinical comorbidity index for use with ICD-9-CM administrative data: differing perspectives.
 #    J Clin Epidemiol. 1993 Oct;46(10):1075-9; discussion 1081-90.
 #    doi: 10.1016/0895-4356(93)90103-8. PMID: 8410092.
 # 3. Quan H, Sundararajan V, Halfon P, Fong A, Burnand B, Luthi JC, Saunders LD, Beck CA, Feasby TE, Ghali WA.

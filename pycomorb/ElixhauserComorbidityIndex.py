@@ -1,22 +1,36 @@
 # Reference for ECI:
-# 1. van Walraven C, Austin PC, Jennings A, Quan H, Forster AJ.
-#    A modification of the Elixhauser comorbidity measures into a point system for hospital death using administrative data.
-#    Med Care. 2009 Jun;47(6):626-33.
-#    doi: 10.1097/MLR.0b013e31819432e5. PMID: 19433995.
-# 2. Elixhauser A, Steiner C, Harris DR, Coffey RM.
+# 1. Elixhauser A, Steiner C, Harris DR, Coffey RM. (ICD-9-CM; 'elixhauser')
 #    Comorbidity measures for use with administrative data.
 #    Med Care. 1998 Jan;36(1):8-27.
 #    doi: 10.1097/00005650-199801000-00004. PMID: 9431328.
 #
-# Reference for ICD-9-CM and ICD-10 Coding Algorithms for Elixhauser Comorbidities:
-# 3. Quan H, Sundararajan V, Halfon P, Fong A, Burnand B, Luthi JC, Saunders LD, Beck CA, Feasby TE, Ghali WA.
+# Reference for ICD Coding Algorithms for Elixhauser Comorbidities (implementation=...):
+# 2. Quan H, Sundararajan V, Halfon P, Fong A, Burnand B, Luthi JC, Saunders LD, Beck CA, Feasby TE, Ghali WA. (ICD-9-CM and ICD-10; 'quan')
 #    Coding algorithms for defining comorbidities in ICD-9-CM and ICD-10 administrative data.
 #    Med Care. 2005 Nov;43(11):1130-9.
 #    doi: 10.1097/01.mlr.0000182534.19832.83. PMID: 16224307.
-# 4. Agency for Healthcare Research and Quality. Elixhauser Comorbidity Software, Version 3.7 (ICD-9-CM).
-#    https://hcup-us.ahrq.gov/toolssoftware/comorbidity/comorbidity.jsp#download (implementation='ahrq_icd9')
-# 5. Agency for Healthcare Research and Quality. Elixhauser Comorbidity Software Refined for ICD-10-CM, v2026.1.
-#    https://hcup-us.ahrq.gov/toolssoftware/comorbidityicd10/comorbidity_icd10.jsp#down (implementation='ahrq_icd10')
+# 3. Agency for Healthcare Research and Quality. Elixhauser Comorbidity Software, Version 3.7 (ICD-9-CM). ('ahrq_icd9')
+#    https://hcup-us.ahrq.gov/toolssoftware/comorbidity/comorbidity.jsp#download
+# 4. Agency for Healthcare Research and Quality. Elixhauser Comorbidity Software Refined for ICD-10-CM, v2026.1. ('ahrq_icd10')
+#    https://hcup-us.ahrq.gov/toolssoftware/comorbidityicd10/comorbidity_icd10.jsp#down
+#
+# Reference for ECI weights (weights=...):
+# 5. van Walraven C, Austin PC, Jennings A, Quan H, Forster AJ. ('van_walraven')
+#    A modification of the Elixhauser comorbidity measures into a point system for hospital death using administrative data.
+#    Med Care. 2009 Jun;47(6):626-33.
+#    doi: 10.1097/MLR.0b013e31819432e5. PMID: 19433995.
+# 6. Thompson NR, Fan Y, Dalton JE, Jehi L, Rosenbaum BP, Vadera S, Griffith SD. ('thompson_30', 'thompson_29')
+#    A new Elixhauser-based comorbidity summary measure to predict in-hospital mortality.
+#    Med Care. 2015 Apr;53(4):374-9.
+#    doi: 10.1097/MLR.0000000000000326. PMID: 25769057; PMCID: PMC4812819.
+# 7. Moore BJ, White S, Washington R, Coenen N, Elixhauser A. ('ahrq_icd9_weights')
+#    Identifying Increased Risk of Readmission and In-hospital Mortality Using Hospital Administrative Data: The AHRQ Elixhauser Comorbidity Index.
+#    Med Care. 2017 Jul;55(7):698-705.
+#    doi: 10.1097/MLR.0000000000000735. PMID: 28498196.
+# 8. Sharma N, Schwendimann R, Endrich O, Ausserhofer D, Simon M. ('swiss')
+#    Comparing Charlson and Elixhauser comorbidity indices with different weightings to predict in-hospital mortality: an analysis of national inpatient data.
+#    BMC Health Serv Res. 2021 Jan 6;21(1):13.
+#    doi: 10.1186/s12913-020-05999-5. PMID: 33407455; PMCID: PMC7786470.
 
 import warnings
 from itertools import product
