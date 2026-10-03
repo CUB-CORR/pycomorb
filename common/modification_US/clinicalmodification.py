@@ -6,10 +6,10 @@ import re
 
 import polars as pl
 
-INPUT_FILE = "508-Version-ICD-10-CM-CONVERSION-TABLE-FY2026-April 1 2026.csv"
+INPUT_FILE = "508-VERSION-ICD-10-CM-CONVERSION-TABLE-FY2027-October 1 2026 - FINAL-.csv"
 OUTPUT_FILE = "icd10cm.csv"
 START_YEAR = 15  # 2015 as 16
-END_YEAR = 26  # 2026 as 26
+END_YEAR = 27  # 2026 as 26
 
 
 def split_codes(codes):
