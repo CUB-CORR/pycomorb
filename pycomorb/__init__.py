@@ -22,18 +22,17 @@ def comorbidity(
     age_col: str = "age",
     year_col: str = "year",
     icd_version: str = "icd10",
-    icd_version_col: str = None,
-    icd_modification: str = None,
+    icd_version_col: str | None = None,
+    icd_modification: str | None = None,
     icd_modification_target_year: int = 2004,
-    implementation: str = None,
-    weights: str = None,
+    implementation: str | None = None,
+    weights: str | None = None,
     definition_data=None,
-    definition_file_path: str = None,
+    definition_file_path: str | None = None,
     weight_col_name: str = "weights",
     score_col_name: str = "Custom Comorbidity Score",
-    mutual_exclusion_rules: list[tuple[str, str]] = None,
+    mutual_exclusion_rules: list[tuple[str, str]] | None = None,
     return_categories: bool = False,
-    fix_dot_in_icd_code: bool = False,
 ):
     """Calculate a comorbidity or frailty score from ICD-coded data.
 
@@ -56,13 +55,11 @@ def comorbidity(
         score_col_name (str, optional): Column name assigned to the calculated score for custom indices. Defaults to ``"Custom Comorbidity Score"``.
         mutual_exclusion_rules (list[tuple[str, str]], optional): Mutually exclusive category pairs for custom indices, where the second entry is suppressed when the first is present. Defaults to ``None``.
         return_categories (bool, optional): If ``True``, includes category indicator columns in the result. Defaults to ``False``.
-        fix_dot_in_icd_code (bool, optional): If ``True``, removes dots from ICD codes prior to processing. Defaults to ``False``.
 
     Returns:
         pl.DataFrame | pandas.DataFrame: DataFrame containing the calculated score and, when ``return_categories`` is ``True``, the category indicators. If the input was a pandas DataFrame, the output matches that type.
 
     Raises:
-        AssertionError: If ICD codes contain dots when ``fix_dot_in_icd_code`` is ``False``.
         ValueError: If the requested ``score`` or ``icd_modification`` is not supported, or required columns are missing.
 
     Example:
@@ -100,21 +97,6 @@ def comorbidity(
     is_pandas = pd and isinstance(df, pd.DataFrame)
     if is_pandas:
         df = pl.from_pandas(df)
-
-    # remove dots from ICD codes if requested
-    if fix_dot_in_icd_code:
-        df = df.with_columns(
-            pl.col(code_col).str.replace(".", "", literal=True)
-        )
-
-    # check that no dots are present in ICD codes (Polars-native)
-    contains_dot = df.select(
-        pl.col(code_col).str.contains(r"\.").any().alias("contains_dot")
-    ).to_dicts()[0]["contains_dot"]
-    assert not contains_dot, f"All values in column '{code_col}' must not contain dots ('.'). Consider setting fix_dot_in_icd_code=True." # fmt: skip
-
-    # strip whitespace from ICD codes, and make uppercase
-    df = df.with_columns(pl.col(code_col).str.strip_chars().str.to_uppercase())
 
     # apply ICD modification if requested
     if icd_modification is not None and "10" in icd_version:

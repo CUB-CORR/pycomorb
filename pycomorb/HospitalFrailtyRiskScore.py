@@ -12,6 +12,8 @@ from pathlib import Path
 import pandas as pd
 import polars as pl
 
+from .CustomComorbidityIndex import CustomComorbidityIndex
+
 
 def HospitalFrailtyRiskScore(
     df: pl.DataFrame,
@@ -61,94 +63,24 @@ def HospitalFrailtyRiskScore(
         "weight" in definitions.columns
     ), "'weight' column not found in definition file."
 
-    def process_single_icd(df, icd_col_name):
-        # Prepare mapping DataFrame: code_col, category
-        code_map_rows = []
-        for row in definitions.iter_rows(named=True):
-            if row["category"] is None or row.get(icd_col_name) is None:
-                continue
-            for code in row[icd_col_name].split("|"):
-                code_map_rows.append(
-                    {"prefix": code.strip(), "category": row["category"]}
-                )
-        code_map = pl.DataFrame(code_map_rows)
-
-        # Create dataframe with presence indicators
-        categories = code_map.select("category").unique()
-        categories_list = categories.to_series().to_list()
-        categories_df = categories.with_columns(
-            pl.when(pl.col("category") == category)
-            .then(pl.lit(1))
-            .otherwise(pl.lit(0))
-            .alias(category)
-            for category in categories_list
-        )
-
-        # Get all unique ICD codes in the data
-        code_prefixes = code_map.select("prefix").to_series()
-        unique_codes = df.select(code_col).unique()
-        code_list = [
-            str(c) for c in unique_codes[code_col].to_list() if c is not None
-        ]
-        if code_list:
-            longest_code_len = max((len(c) for c in code_list), default=1)
-        else:
-            longest_code_len = 1
-
-        # Create a DataFrame with all possible prefixes, then find the best match
-        best_prefix = (
-            unique_codes.with_columns(
-                pl.col(code_col).str.slice(0, n).alias(f"prefix_{n}")
-                for n in range(1, longest_code_len + 1)
-            )
-            .with_columns(
-                pl.when(pl.col(f"prefix_{n}").is_in(code_prefixes))
-                .then(pl.col(f"prefix_{n}"))
-                .otherwise(None)
-                .alias(f"prefix_{n}")
-                for n in range(1, longest_code_len + 1)
-            )
-            .with_columns(
-                pl.coalesce(
-                    *[
-                        pl.col(f"prefix_{n}")
-                        for n in range(longest_code_len, 0, -1)
-                    ]
-                ).alias("best_prefix")
-            )
-            .select(code_col, "best_prefix")
-            .drop_nulls("best_prefix")
-        )
-
-        code_to_category = (
-            best_prefix.join(
-                code_map, left_on="best_prefix", right_on="prefix", how="left"
-            )
-            .select(code_col, "category")
-            .join(categories_df, on="category", how="left")
-            .select(code_col, *categories_list)
-        )
-
-        # Join diagnoses with code_to_category to get the best matching category for each diagnosis
-        df_presence_absence = (
-            df.join(code_to_category, on=code_col, how="left")
-            .group_by(id_col)
-            .agg(pl.max(cat).fill_null(0).alias(cat) for cat in categories_list)
-        )
-
-        # Add missing columns
-        for cat in categories_list:
-            if cat not in df_presence_absence.columns:
-                df_presence_absence = df_presence_absence.with_columns(
-                    pl.lit(0).alias(cat)
-                )
-        df_presence_absence = df_presence_absence.select(
-            [id_col] + categories_list
-        )
-        return df_presence_absence, categories_list
-
     # Only ICD-10 supported for HFRS
-    df_presence_absence, all_categories = process_single_icd(df, "icd10_codes")
+    def detect_categories(chunk):
+        return CustomComorbidityIndex(
+            df=df,
+            id_col=id_col,
+            code_col=code_col,
+            icd_version=icd_version,
+            definition_data=chunk,
+            weight_col_name="weight",
+            score_col_name="HFRS Score",
+            return_categories=True,
+        ).drop("HFRS Score")
+
+    # CustomComorbidityIndex handles at most 63 definition rows, HFRS.csv has 109
+    all_categories = definitions["category"].to_list()
+    df_presence_absence = detect_categories(definitions[:63]).join(
+        detect_categories(definitions[63:]), on=id_col
+    )
 
     # STEP 2: calculate HFRS score
     category_weights = dict(zip(definitions["category"], definitions["weight"]))

@@ -127,18 +127,18 @@ def CharlsonComorbidityIndex(
     if implementation == "sokolowski":
         assert year_col is not None and year_col in df.columns, "Implementation 'sokolowski' requires a 'year_col' column (ICD-10-GM catalogue year) in the input DataFrame." # fmt: skip
 
-    # STEP 0: select relevant columns and rename diagnosis code column
-    # diagnoses handled by CustomComorbidityIndex
-    patient_ages = df.select(id_col, age_col)
+    # STEP 0: diagnoses are handled by CustomComorbidityIndex
 
-    # STEP 1: Calculate Age Score separately
+    # STEP 1: Calculate Age Score separately (on one age per patient, not per diagnosis row)
     #  < 50: 0
     #  < 60: 1
     #  < 70: 2
     #  < 80: 3
     # >= 80: 4
     age_scores = (
-        patient_ages.with_columns(
+        df.group_by(id_col)
+        .agg(pl.col(age_col).max())
+        .with_columns(
             pl.when(pl.col(age_col) < 50)
             .then(pl.lit(0))
             .when(pl.col(age_col) < 60)
@@ -152,8 +152,7 @@ def CharlsonComorbidityIndex(
             .cast(int)
             .alias("Age Score")
         )
-        .group_by(id_col)
-        .agg(pl.col("Age Score").max().alias("Age Score"))
+        .select(id_col, "Age Score")
     )
 
     # STEP 2: Calculate Comorbidity Score using generalized function

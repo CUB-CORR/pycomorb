@@ -9,6 +9,17 @@ from pathlib import Path
 import polars as pl
 
 
+def clean_unique_codes(unique_codes: pl.DataFrame, code_col: str) -> pl.DataFrame:
+    """Add unique ICD codes without dots, stripped and uppercased as 'clean'."""
+    return unique_codes.with_columns(
+        pl.col(code_col)
+        .str.replace_all(".", "", literal=True)
+        .str.strip_chars()
+        .str.to_uppercase()
+        .alias("clean")
+    )
+
+
 def get_icdmodification(
     data: pl.DataFrame,
     transfer_file_path: str,
@@ -34,10 +45,10 @@ def get_icdmodification(
 
     assert code_col in data.columns, f"Column '{code_col}' (ICD code) must be present in input DataFrame." # fmt: skip
     assert year_col in data.columns, f"Column '{year_col}' (year) must be present in input DataFrame." # fmt: skip
-    assert (
-        data.height
-        == data.filter(pl.col(code_col).str.contains(r"^[A-Z]")).height
-    ), f"All values in column '{code_col}' must start with an uppercase letter (A-Z)."
+
+    # Validate and clean the unique (code, year) pairs only; the crosswalk is joined on the cleaned code
+    pairs = clean_unique_codes(data.select(code_col, year_col).unique(), code_col)
+    assert pairs["clean"].str.contains(r"^[A-Z]").all(), f"All values in column '{code_col}' must start with an uppercase letter (A-Z)." # fmt: skip
 
     # Unpivot the data to long format
     transfer_data = (
@@ -51,15 +62,23 @@ def get_icdmodification(
         .rename({str(target_year): f"icd_{target_year}"})
     )
 
-    return (
-        data.join(transfer_data, on=[code_col, year_col], how="left")
-        # Prefer mapped code, but fall back to original if no mapping available
-        .with_columns(
-            pl.coalesce(pl.col(f"icd_{target_year}"), pl.col(code_col)).alias(
+    mapped = (
+        pairs.join(
+            transfer_data.rename({code_col: "clean"}),
+            on=["clean", year_col],
+            how="left",
+        )
+        # Prefer mapped code, but fall back to the cleaned original if no mapping available
+        .select(
+            code_col,
+            year_col,
+            pl.coalesce(pl.col(f"icd_{target_year}"), pl.col("clean")).alias(
                 f"icd_{target_year}"
-            )
+            ),
         )
     )
+
+    return data.join(mapped, on=[code_col, year_col], how="left")
 
 
 def get_icd10gm(

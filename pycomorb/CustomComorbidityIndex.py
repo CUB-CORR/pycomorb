@@ -1,8 +1,9 @@
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
 
 import polars as pl
+
+from .ICDModifications import clean_unique_codes
 
 
 def CustomComorbidityIndex(
@@ -10,12 +11,12 @@ def CustomComorbidityIndex(
     id_col: str = "id",
     code_col: str = "code",
     icd_version: str = "icd10",
-    icd_version_col: str = None,
-    definition_data: Union[Path, pl.DataFrame] = None,
-    weight_col_name: str = None,
-    score_col_name: str = None,
-    mutual_exclusion_rules: Optional[List[Tuple[str, str]]] = None,
-    year_col: str = None,
+    icd_version_col: str | None = None,
+    definition_data: Path | pl.DataFrame | None = None,
+    weight_col_name: str | None = None,
+    score_col_name: str | None = None,
+    mutual_exclusion_rules: list[tuple[str, str]] | None = None,
+    year_col: str | None = None,
     return_categories=False,
 ):
     """Compute a custom comorbidity score from ICD-coded input data.
@@ -87,15 +88,17 @@ def CustomComorbidityIndex(
                 )
         code_map = pl.DataFrame(code_map_rows)
 
-        # Get all unique ICD codes in the data
+        # Get all unique ICD codes in the data; validation and cleaning only touch these,
+        # the diagnosis rows keep their raw codes and are joined on them below
         code_prefixes = code_map.select("prefix").to_series().to_list()
         unique_codes = df.select(code_col).unique()
-        longest_code = max(unique_codes.to_series().to_list(), key=len)
+        unique_codes = clean_unique_codes(unique_codes, code_col)
+        longest_code = max(unique_codes["clean"].to_list(), key=len)
 
         # Create a DataFrame with all possible prefixes, then find the best match
         best_prefix = (
             unique_codes.with_columns(
-                pl.col(code_col).str.slice(0, n).alias(f"prefix_{n}")
+                pl.col("clean").str.slice(0, n).alias(f"prefix_{n}")
                 for n in range(1, len(longest_code) + 1)
             )
             .with_columns(
