@@ -162,19 +162,14 @@ def CustomComorbidityIndex(
                 for n in range(1, len(longest_code) + 1)
             )
             # Count ICD code as present for each comorbidity it matches
-            .with_columns(
-                pl.concat_list(
-                    pl.col(f"prefix_{n}")
-                    for n in range(1, len(longest_code) + 1)
-                )
-                .list.drop_nulls()
-                .list.unique()
-                .alias("best_prefixes")
+            .unpivot(
+                on=[f"prefix_{n}" for n in range(1, len(longest_code) + 1)],
+                index=code_col,
+                value_name="best_prefix",
             )
-            .explode("best_prefixes")
-            .rename({"best_prefixes": "best_prefix"})
-            .select(code_col, "best_prefix")
             .drop_nulls("best_prefix")
+            .select(code_col, "best_prefix")
+            .unique()
         )
 
         # Join diagnoses with the bits of their code; only matching diagnoses are aggregated

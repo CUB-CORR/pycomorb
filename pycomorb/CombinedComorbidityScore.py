@@ -36,7 +36,7 @@ def CombinedComorbidityScore(
     df: pl.DataFrame,
     id_col: str = "id",
     code_col: str = "code",
-    icd_version: str = "icd9",
+    icd_version: str = "icd10",
     icd_version_col: str | None = None,
     return_categories=False,
 ):
@@ -46,7 +46,7 @@ def CombinedComorbidityScore(
         df (pl.DataFrame): Input data containing at least ``id_col`` and ``code_col``.
         id_col (str, optional): Column name containing unique identifiers. Defaults to ``"id"``.
         code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
-        icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd9"``.
+        icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd10"``.
         icd_version_col (str, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``. Defaults to ``None``.
         return_categories (bool, optional): If ``True``, includes indicator columns for each Combined Comorbidity Score category. Defaults to ``False``.
 
