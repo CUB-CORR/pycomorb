@@ -1,9 +1,55 @@
+import warnings
 from collections import defaultdict
+from itertools import product
 from pathlib import Path
 
 import polars as pl
+import yaml
 
-from .ICDModifications import clean_unique_codes
+from .ICDModifications import check_code_dtype, clean_code_expr
+
+
+def coerce_icd_version(icd_version, implementation, icd9_only, icd10_only):
+    """Replace an ICD version the implementation cannot use, with a warning."""
+    if implementation in icd9_only:
+        version, label = "icd9", "ICD-9"
+    elif implementation in icd10_only:
+        version, label = "icd10", "ICD-10"
+    else:
+        return icd_version
+    if icd_version in ("icd9", "icd10", "icd9_10") and icd_version != version:
+        warnings.warn(
+            f"Implementation '{implementation}' only uses {label}. Setting ICD version to '{version}'.",
+            UserWarning,
+            stacklevel=3,
+        )
+        return version
+    return icd_version
+
+
+def weighted_definitions(prefix, definition_file, implementation, canonical_rules):
+    """Definitions of a Charlson/Elixhauser implementation joined with its weights, plus its exclusion rules.
+
+    ``prefix`` ("CHARLSON" or "ELIXHAUSER") names the weight and alias files; ``canonical_rules`` are
+    (more severe, milder) pairs in canonical category names, translated to the implementation's own names.
+    """
+    base_path = Path(__file__).parent / "common"
+    definitions = pl.read_csv(base_path / definition_file)
+    weights = pl.read_csv(base_path / f"{prefix}_WEIGHTS.csv").drop("index")
+    with open(base_path / f"{prefix}_CATEGORY_ALIASES.yaml") as f:
+        aliases = yaml.safe_load(f).get(implementation, {})
+    combined = (
+        definitions.with_columns(pl.col("category").replace(aliases).alias("__weight_category__"))
+        .join(weights.rename({"category": "__weight_category__"}), on="__weight_category__", how="left")
+        .drop("__weight_category__")
+    )
+    canonical = {c: aliases.get(c, c) for c in combined["category"]}
+    rules = [
+        (severe, mild)
+        for severe, mild in product(canonical, repeat=2)
+        if (canonical[severe], canonical[mild]) in canonical_rules
+    ]
+    return combined, rules
 
 
 def CustomComorbidityIndex(
@@ -37,8 +83,11 @@ def CustomComorbidityIndex(
     Returns:
         pl.DataFrame: DataFrame containing ``id_col``, the calculated score column, and, when ``return_categories`` is ``True``, category indicators.
 
+    Patients without a usable code are kept with all categories 0.
+
     Raises:
         AssertionError: If required columns or definitions are missing, or if ``icd_version`` and ``icd_version_col`` are inconsistent.
+        ValueError: If ``code_col`` holds numbers instead of strings, or if ``mutual_exclusion_rules`` name a category that is not in the definitions.
     """
 
     # Input validation
@@ -65,8 +114,9 @@ def CustomComorbidityIndex(
         weight_col_name in definitions.columns
     ), f"'{weight_col_name}' column not found in definition file."
 
-    # Drop rows from df with missing codes
-    df = df.filter(pl.col(code_col).is_not_null())
+    df = check_code_dtype(df, code_col)
+    all_ids = df.select(id_col).unique()
+    df = df.filter(pl.col(code_col).is_not_null() & (clean_code_expr(code_col) != ""))
 
     # Year gating only applies when both year_col and a year column are given
     year_aware = year_col is not None and "year" in definitions.columns
@@ -76,6 +126,9 @@ def CustomComorbidityIndex(
         # per-patient mask; a category is present if all bits of one of its groups are set,
         # where a group is a single row or the rows sharing an and_group.
         categories_list = definitions["category"].drop_nulls().unique(maintain_order=True).to_list()
+        if df.is_empty():  # no codes of this ICD version: nothing present
+            empty = df.select(id_col).unique()
+            return empty.with_columns(pl.lit(0).cast(int).alias(c) for c in categories_list), categories_list
         required, code_map_rows = defaultdict(lambda: defaultdict(int)), []
         for i, row in enumerate(definitions.iter_rows(named=True)):
             if row["category"] is None or row.get(icd_col_name) is None:
@@ -92,7 +145,7 @@ def CustomComorbidityIndex(
         # the diagnosis rows keep their raw codes and are joined on them below
         code_prefixes = code_map.select("prefix").to_series().to_list()
         unique_codes = df.select(code_col).unique()
-        unique_codes = clean_unique_codes(unique_codes, code_col)
+        unique_codes = unique_codes.with_columns(clean_code_expr(code_col).alias("clean"))
         longest_code = max(unique_codes["clean"].to_list(), key=len)
 
         # Create a DataFrame with all possible prefixes, then find the best match
@@ -179,23 +232,23 @@ def CustomComorbidityIndex(
             if cat in all_categories_set and cat is not None
         ]
         df_combined = df9.join(
-            df10, on=id_col, how="outer", suffix="_right", coalesce=True
+            df10, on=id_col, how="full", suffix="_right", coalesce=True
         )
+        # both halves report every category, so each has a "_right" counterpart
         for cat in all_categories:
-            left = cat
-            right = f"{cat}_right"
-            if left in df_combined.columns and right in df_combined.columns:
-                df_combined = df_combined.with_columns(
-                    pl.max_horizontal(pl.col(left), pl.col(right)).alias(cat)
-                )
-            elif right in df_combined.columns:
-                df_combined = df_combined.rename({right: cat})
+            df_combined = df_combined.with_columns(
+                pl.max_horizontal(pl.col(cat), pl.col(f"{cat}_right")).alias(cat)
+            )
         df_presence_absence = df_combined.select([id_col] + all_categories)
     else:
         icd_col_name = f"{icd_version}_codes"
         df_presence_absence, all_categories = process_single_icd(
             df, icd_col_name
         )
+
+    df_presence_absence = all_ids.join(df_presence_absence, on=id_col, how="left").with_columns(
+        pl.col(cat).fill_null(0) for cat in all_categories
+    )
 
     # STEP 2: calculate score
     category_weights = dict(
@@ -208,18 +261,16 @@ def CustomComorbidityIndex(
     }
 
     # Apply mutual exclusion rules
-    if mutual_exclusion_rules:
-        for complicated, uncomplicated in mutual_exclusion_rules:
-            if (
-                complicated in df_presence_absence.columns
-                and uncomplicated in df_presence_absence.columns
-            ):
-                df_presence_absence = df_presence_absence.with_columns(
-                    pl.when(pl.col(complicated) == 1)
-                    .then(0)
-                    .otherwise(pl.col(uncomplicated))
-                    .alias(uncomplicated)
-                )
+    for complicated, uncomplicated in mutual_exclusion_rules or []:
+        unknown = {complicated, uncomplicated} - set(df_presence_absence.columns)
+        if unknown:
+            raise ValueError(f"mutual_exclusion_rules refer to unknown categories: {sorted(unknown)}.") # fmt: skip
+        df_presence_absence = df_presence_absence.with_columns(
+            pl.when(pl.col(complicated) == 1)
+            .then(0)
+            .otherwise(pl.col(uncomplicated))
+            .alias(uncomplicated)
+        )
 
     # calculate scores
     # Ensure weights are applied only to existing category columns that have weights
@@ -230,8 +281,4 @@ def CustomComorbidityIndex(
     ).alias(score_col_name)
 
     cols = [id_col] + all_categories if return_categories else [id_col]
-    comorbidity_df = df_presence_absence.select(*cols, score_expr).cast(
-        {score_col_name: int}
-    )
-
-    return comorbidity_df
+    return df_presence_absence.select(*cols, score_expr)

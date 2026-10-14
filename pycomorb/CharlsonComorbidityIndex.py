@@ -60,14 +60,36 @@
 # ('charlson' = ref. 1, 'rcs' = ref. 8, 'uk_shmi' = ref. 11)
 
 import warnings
-from itertools import product
-from pathlib import Path
 
 import polars as pl
-import yaml
 
-from .CustomComorbidityIndex import CustomComorbidityIndex
+from .CustomComorbidityIndex import (
+    CustomComorbidityIndex,
+    coerce_icd_version,
+    weighted_definitions,
+)
 
+DEFINITION_FILES = {
+    "quan": "CHARLSON_QUAN.csv",
+    "deyo": "CHARLSON_DEYO.csv",
+    "dhoore": "CHARLSON_DHOORE.csv",
+    "romano": "CHARLSON_ROMANO.csv",
+    "australia": "CHARLSON_AUSTRALIA.csv",
+    "sweden": "CHARLSON_SWEDEN.csv",
+    "rcs": "CHARLSON_RCS.csv",
+    "uk_shmi": "CHARLSON_UK_SHMI_v1.60.csv",
+    "sokolowski": "CHARLSON_SOKOLOWSKI.csv",
+    "thygesen": "CHARLSON_THYGESEN.csv",
+}
+ICD9_ONLY = {"deyo", "dhoore", "romano"}
+ICD10_ONLY = {"australia", "rcs", "uk_shmi", "sokolowski", "thygesen"}
+# (more severe, milder): only the more severe category is counted when both are present.
+# Sweden splits Chronic pulmonary disease, but the Swedish SAS code sums both parts (weight 1 each).
+CANONICAL_RULES = [
+    ("Diabetes with chronic complication", "Diabetes without chronic complication"),
+    ("Moderate or severe liver disease", "Mild liver disease"),
+    ("Metastatic solid tumor", "Any malignancy"),
+]
 SCORE_COL_NAME = "Charlson Comorbidity Index"
 FINAL_SCORE_COL_NAME = "Charlson Age-Comorbidity Score"
 
@@ -106,46 +128,10 @@ def CharlsonComorbidityIndex(
         ValueError: If ``implementation`` is unsupported.
     """
 
-    # Change ICD to ICD-9 for Deyo, D'Hoore and Romano
-    if icd_version in ("icd10", "icd9_10") and implementation in [
-        "deyo",
-        "dhoore",
-        "romano",
-    ]:
-        warnings.warn(
-            f"Implementation '{implementation}' only uses ICD-9. Setting ICD version to 'icd9'.",
-            UserWarning,
-            stacklevel=2,
-        )
-        icd_version = "icd9"
-    # Change ICD to ICD-10 for Australian, UK, Sokołowski and Thygesen versions
-    elif icd_version in ("icd9", "icd9_10") and implementation in [
-        "australia",
-        "rcs",
-        "uk_shmi",
-        "sokolowski",
-        "thygesen",
-    ]:
-        warnings.warn(
-            f"Implementation '{implementation}' only uses ICD-10. Setting ICD version to 'icd10'.",
-            UserWarning,
-            stacklevel=2,
-        )
-        icd_version = "icd10"
+    icd_version = coerce_icd_version(icd_version, implementation, ICD9_ONLY, ICD10_ONLY)
 
     # Input validation specific to Charlson
-    assert implementation in [
-        "quan",
-        "deyo",
-        "romano",
-        "dhoore",
-        "australia",
-        "sweden",
-        "rcs",
-        "uk_shmi",
-        "sokolowski",
-        "thygesen",
-    ], "implementation must be one of: 'quan', 'deyo', 'romano', 'dhoore', 'australia', 'sweden', 'rcs', 'uk_shmi', 'sokolowski', or 'thygesen'."
+    assert implementation in DEFINITION_FILES, f"implementation must be one of: {list(DEFINITION_FILES)}."
     assert weights in [
         "charlson",
         "schneeweiss",
@@ -167,7 +153,8 @@ def CharlsonComorbidityIndex(
     # >= 80: 4
     age_scores = (
         df.group_by(id_col)
-        .agg(pl.col(age_col).max())
+        # an unknown age (null or NaN) gives no age points
+        .agg(pl.col(age_col).cast(pl.Float64).fill_nan(None).max().fill_null(0))
         .with_columns(
             pl.when(pl.col(age_col) < 50)
             .then(pl.lit(0))
@@ -178,7 +165,6 @@ def CharlsonComorbidityIndex(
             .when(pl.col(age_col) < 80)
             .then(pl.lit(3))
             .otherwise(pl.lit(4))
-            .fill_null(0)  # Assume age 0 if null
             .cast(int)
             .alias("Age Score")
         )
@@ -186,31 +172,6 @@ def CharlsonComorbidityIndex(
     )
 
     # STEP 2: Calculate Comorbidity Score using generalized function
-    # Determine definition file based on implementation
-    if implementation == "quan":
-        definition_file = "CHARLSON_QUAN.csv"
-    elif implementation == "deyo":
-        definition_file = "CHARLSON_DEYO.csv"
-    elif implementation == "dhoore":
-        definition_file = "CHARLSON_DHOORE.csv"
-    elif implementation == "romano":
-        definition_file = "CHARLSON_ROMANO.csv"
-    elif implementation == "australia":
-        definition_file = "CHARLSON_AUSTRALIA.csv"
-    elif implementation == "sweden":
-        definition_file = "CHARLSON_SWEDEN.csv"
-    elif implementation == "rcs":
-        definition_file = "CHARLSON_RCS.csv"
-    elif implementation == "uk_shmi":
-        definition_file = "CHARLSON_UK_SHMI_v1.60.csv"
-    elif implementation == "sokolowski":
-        definition_file = "CHARLSON_SOKOLOWSKI.csv"
-    elif implementation == "thygesen":
-        definition_file = "CHARLSON_THYGESEN.csv"
-    else:
-        # Should be caught by assert earlier
-        raise ValueError(f"Unsupported implementation: {implementation}")
-
     # Determine weight column and score column names based on weights argument
     # rcs/uk_shmi implementations always use their own matching weights
     if implementation in ("rcs", "uk_shmi") and weights != implementation:
@@ -222,52 +183,9 @@ def CharlsonComorbidityIndex(
         weights = implementation
     weight_col_name = f"{weights}_weights"
 
-    # Load definition and weight files
-    base_path = Path(__file__).parent / "common"
-    definition_file_path = base_path / definition_file
-    weights_file_path = base_path / "CHARLSON_WEIGHTS.csv"
-
-    df_definitions = pl.read_csv(definition_file_path)
-    df_weights = pl.read_csv(weights_file_path).drop("index")
-
-    # Join definitions and weights
-    # Ensure 'category' column exists in both for joining
-    if (
-        "category" not in df_definitions.columns
-        or "category" not in df_weights.columns
-    ):
-        raise ValueError("Both definition and weight files must contain a 'category' column.") # fmt: skip
-
-    # Alias renamed categories to CHARLSON_WEIGHTS.csv's names for the weight
-    # lookup only; see CHARLSON_CATEGORY_ALIASES.yaml for the mapping
-    with open(base_path / "CHARLSON_CATEGORY_ALIASES.yaml") as f:
-        category_aliases = yaml.safe_load(f).get(implementation, {})
-
-    df_combined = (
-        df_definitions.with_columns(
-            pl.col("category").replace(category_aliases).alias("__weight_category__")
-        )
-        .join(df_weights.rename({"category": "__weight_category__"}), on="__weight_category__", how="left")
-        .drop("__weight_category__")
+    df_combined, mutual_exclusion_rules = weighted_definitions(
+        "CHARLSON", DEFINITION_FILES[implementation], implementation, CANONICAL_RULES
     )
-
-    # Mutual exclusion: if both categories of a pair are present, only the first
-    # (more severe) is counted. Rules use canonical names, mapped to each
-    # implementation's own names via its aliases.
-    canonical_rules = [
-        ("Diabetes with chronic complication", "Diabetes without chronic complication"),
-        ("Moderate or severe liver disease", "Mild liver disease"),
-        ("Metastatic solid tumor", "Any malignancy"),
-        # Sweden splits Chronic pulmonary disease - no exclusion needed between them,
-        # the Swedish SAS code sums "copd" and "other_cpd" (weight 1 each).
-    ]
-    # own category name -> canonical name
-    canonical = {c: category_aliases.get(c, c) for c in df_combined["category"]}
-    mutual_exclusion_rules = [
-        (severe, mild)
-        for severe, mild in product(canonical, repeat=2)
-        if (canonical[severe], canonical[mild]) in canonical_rules
-    ]
 
     df_charlson = CustomComorbidityIndex(
         df=df,
@@ -331,14 +249,14 @@ def CharlsonComorbidity_10year_survival(
         precalculated_df (bool, optional): If ``True``, assumes ``df`` already includes a ``"Charlson Age-Comorbidity Score"`` column. Defaults to ``False``.
 
     Returns:
-        pl.DataFrame: DataFrame with two columns: ``id_col`` and ``"10-year survival probability"``.
+        pl.DataFrame: DataFrame with two columns: ``id_col`` and ``"10-year survival probability"``, calculated as ``0.983 ** exp(0.9 * CCI)`` from the age-adjusted Charlson score (Charlson et al. 1994).
 
     Raises:
         AssertionError: If required columns are missing when ``precalculated_df`` is ``True``.
     """
 
     if not precalculated_df:
-        df, _ = CharlsonComorbidityIndex(
+        df = CharlsonComorbidityIndex(
             df=df,
             id_col=id_col,
             code_col=code_col,
@@ -351,14 +269,14 @@ def CharlsonComorbidity_10year_survival(
     else:
         assert (
             FINAL_SCORE_COL_NAME in df.columns
-        ), "Input DataFrame must contain column 'Charlson Score'."
+        ), f"Input DataFrame must contain column '{FINAL_SCORE_COL_NAME}'."
         assert (
             id_col in df.columns
         ), f"Input DataFrame must contain column '{id_col}'."
 
-    # Formula: 0.983 ^ (CCI Score * 0.9)
+    # Charlson et al. 1994: 10-year survival = 0.983 ^ exp(0.9 * CCI)
     return df.with_columns(
-        (0.983 ** (pl.col(FINAL_SCORE_COL_NAME) * 0.9))
+        (pl.lit(0.983) ** (0.9 * pl.col(FINAL_SCORE_COL_NAME)).exp())
         .round(3)
         .alias("10-year survival probability")
     ).select(id_col, "10-year survival probability")

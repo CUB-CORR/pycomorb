@@ -28,6 +28,7 @@ import polars as pl
 
 from .CustomComorbidityIndex import CustomComorbidityIndex
 
+DEFINITION_FILE = Path(__file__).parent / "common" / "GAGNE.csv"
 SCORE_COL_NAME = "Combined Comorbidity Score"
 
 
@@ -56,27 +57,19 @@ def CombinedComorbidityScore(
         AssertionError: If required columns are missing.
     """
 
-    definition_file = "GAGNE.csv"
-    definition_file_path = Path(__file__).parent / "common" / definition_file
-    weight_col_name = "weights"
-
     # No mutual exclusion rules:
     # - the published Gagne SAS code treats "Any tumor" (1) and "Metastatic cancer" (5)
     #   as independent flags and sums both.
     # - uncomplicated diabetes has weight 0 (and is not considered in the SAS code),
     #   so complicated diabetes does not need to suppress it.
-
-    # Call the generalized function
-    df_ccs = CustomComorbidityIndex(
+    return CustomComorbidityIndex(
         df=df,
         id_col=id_col,
         code_col=code_col,
         icd_version=icd_version,
         icd_version_col=icd_version_col,
-        definition_data=definition_file_path,
-        weight_col_name=weight_col_name,
+        definition_data=DEFINITION_FILE,
+        weight_col_name="weights",
         score_col_name=SCORE_COL_NAME,
         return_categories=return_categories,
     )
-
-    return df_ccs

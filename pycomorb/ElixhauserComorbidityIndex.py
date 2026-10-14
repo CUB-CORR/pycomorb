@@ -33,14 +33,35 @@
 #    doi: 10.1186/s12913-020-05999-5. PMID: 33407455; PMCID: PMC7786470.
 
 import warnings
-from itertools import product
-from pathlib import Path
 
 import polars as pl
-import yaml
 
-from .CustomComorbidityIndex import CustomComorbidityIndex
+from .CustomComorbidityIndex import (
+    CustomComorbidityIndex,
+    coerce_icd_version,
+    weighted_definitions,
+)
 
+DEFINITION_FILES = {
+    "quan": "ELIXHAUSER_QUAN.csv",
+    "elixhauser": "ELIXHAUSER.csv",
+    "ahrq_icd9": "ELIXHAUSER_AHRQ_ICD9.csv",
+    "ahrq_icd10": "ELIXHAUSER_AHRQ_ICD10.csv",
+}
+ICD9_ONLY = {"elixhauser", "ahrq_icd9"}
+ICD10_ONLY = {"ahrq_icd10"}
+# (more severe, milder): only the more severe category is counted when both are present
+CANONICAL_RULES = [
+    # --- general: every implementation has these tiers ---
+    ("Diabetes complicated", "Diabetes uncomplicated"),
+    ("Hypertension complicated", "Hypertension uncomplicated"),
+    ("Metastatic cancer", "Solid tumor without metastasis"),
+    # --- subset: only ahrq_icd10 has these tiers (severity levels, in-situ tumors) ---
+    ("Liver disease, moderate to severe", "Liver disease"),
+    ("Renal failure, severe", "Renal failure"),
+    ("Metastatic cancer", "Solid tumor without metastasis, in situ"),
+    ("Solid tumor without metastasis", "Solid tumor without metastasis, in situ"),
+]
 SCORE_COL_NAME = "Elixhauser Comorbidity Index"
 
 
@@ -76,33 +97,10 @@ def ElixhauserComorbidityIndex(
         ValueError: If an unsupported ``implementation`` or ``weights`` argument passes validation safeguards.
     """
 
-    # Change ICD to ICD-9 for original Elixhauser and AHRQ ICD-9
-    if icd_version in ("icd10", "icd9_10") and implementation in [
-        "elixhauser",
-        "ahrq_icd9",
-    ]:
-        warnings.warn(
-            f"Implementation '{implementation}' only uses ICD-9. Setting ICD version to 'icd9'.",
-            UserWarning,
-            stacklevel=2
-        )
-        icd_version = "icd9"
-    # Change ICD to ICD-10 for AHRQ ICD-10
-    if icd_version in ("icd9", "icd9_10") and implementation in ["ahrq_icd10"]:
-        warnings.warn(
-            f"Implementation '{implementation}' only uses ICD-10. Setting ICD version to 'icd10'.",
-            UserWarning,
-            stacklevel=2
-        )
-        icd_version = "icd10"
+    icd_version = coerce_icd_version(icd_version, implementation, ICD9_ONLY, ICD10_ONLY)
 
     # Input validation specific to Elixhauser
-    assert implementation in [
-        "quan",
-        "elixhauser",
-        "ahrq_icd9",
-        "ahrq_icd10",
-    ], "implementation must be one of: 'quan', 'elixhauser', 'ahrq_icd9', or 'ahrq_icd10'."
+    assert implementation in DEFINITION_FILES, f"implementation must be one of: {list(DEFINITION_FILES)}."
     assert weights in [
         "van_walraven",
         "thompson_30",
@@ -112,19 +110,6 @@ def ElixhauserComorbidityIndex(
     ], "weights must be one of: 'van_walraven', 'thompson_30', 'thompson_29', 'ahrq', or 'swiss'."
     if implementation == "ahrq_icd10":
         assert year_col is not None and year_col in df.columns, "Implementation 'ahrq_icd10' requires a 'year_col' column (diagnosis year) in the input DataFrame." # fmt: skip
-
-    # Determine definition file based on implementation
-    if implementation == "quan":
-        definition_file = "ELIXHAUSER_QUAN.csv"
-    elif implementation == "elixhauser":
-        definition_file = "ELIXHAUSER.csv"
-    elif implementation == "ahrq_icd9":
-        definition_file = "ELIXHAUSER_AHRQ_ICD9.csv"
-    elif implementation == "ahrq_icd10":
-        definition_file = "ELIXHAUSER_AHRQ_ICD10.csv"
-    else:
-        # Should be caught by assert earlier, but as a safeguard
-        raise ValueError(f"Unsupported implementation: {implementation}")
 
     # Determine weight column and score column names based on weights argument
     # AHRQ implementations always use their own AHRQ weights; icd_version
@@ -143,55 +128,9 @@ def ElixhauserComorbidityIndex(
     else:
         weight_col_name = f"{weights}_weights"
 
-    # Load definition and weight files
-    base_path = Path(__file__).parent / "common"
-    definition_file_path = base_path / definition_file
-    weights_file_path = base_path / "ELIXHAUSER_WEIGHTS.csv"
-
-    df_definitions = pl.read_csv(definition_file_path)
-    df_weights = pl.read_csv(weights_file_path).drop("index")
-
-    # Join definitions and weights
-    # Ensure 'category' column exists in both for joining
-    if (
-        "category" not in df_definitions.columns
-        or "category" not in df_weights.columns
-    ):
-        raise ValueError("Both definition and weight files must contain a 'category' column.") # fmt: skip
-
-    # Alias renamed categories to ELIXHAUSER_WEIGHTS.csv's names for the weight
-    # lookup only; see ELIXHAUSER_CATEGORY_ALIASES.yaml for the mapping
-    with open(base_path / "ELIXHAUSER_CATEGORY_ALIASES.yaml") as f:
-        category_aliases = yaml.safe_load(f).get(implementation, {})
-    df_combined = (
-        df_definitions.with_columns(
-            pl.col("category").replace(category_aliases).alias("__weight_category__")
-        )
-        .join(df_weights.rename({"category": "__weight_category__"}), on="__weight_category__", how="left")
-        .drop("__weight_category__")
+    df_combined, mutual_exclusion_rules = weighted_definitions(
+        "ELIXHAUSER", DEFINITION_FILES[implementation], implementation, CANONICAL_RULES
     )
-
-    # Mutual exclusion: if both categories of a pair are present, only the first
-    # (more severe) is counted. Rules use canonical names, mapped to each
-    # implementation's own names via its aliases.
-    canonical_rules = [
-        # --- general: every implementation has these tiers ---
-        ("Diabetes complicated", "Diabetes uncomplicated"),
-        ("Hypertension complicated", "Hypertension uncomplicated"),
-        ("Metastatic cancer", "Solid tumor without metastasis"),
-        # --- subset: only ahrq_icd10 has these tiers (severity levels, in-situ tumors) ---
-        ("Liver disease, moderate to severe", "Liver disease"),
-        ("Renal failure, severe", "Renal failure"),
-        ("Metastatic cancer", "Solid tumor without metastasis, in situ"),
-        ("Solid tumor without metastasis", "Solid tumor without metastasis, in situ"),
-    ]
-    # own category name -> canonical name
-    canonical = {c: category_aliases.get(c, c) for c in df_combined["category"]}
-    mutual_exclusion_rules = [
-        (severe, mild)
-        for severe, mild in product(canonical, repeat=2)
-        if (canonical[severe], canonical[mild]) in canonical_rules
-    ]
 
     # Call the generalized function with the combined DataFrame
     df_elixhauser = CustomComorbidityIndex(

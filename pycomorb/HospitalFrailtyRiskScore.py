@@ -15,6 +15,10 @@ import polars as pl
 from .CustomComorbidityIndex import CustomComorbidityIndex
 
 
+DEFINITION_FILE = Path(__file__).parent / "common" / "HFRS.csv"
+SCORE_COL_NAME = "HFRS Score"
+
+
 def HospitalFrailtyRiskScore(
     df: pl.DataFrame,
     id_col: str = "id",
@@ -38,74 +42,23 @@ def HospitalFrailtyRiskScore(
         AssertionError: If ``icd_version`` is not ``"icd10"`` or required columns are missing.
     """
 
-    # Check if input is pandas DataFrame and convert to polars
-    is_pandas = pd and isinstance(df, pd.DataFrame)
+    is_pandas = isinstance(df, pd.DataFrame)
     if is_pandas:
         df = pl.from_pandas(df)
 
-    # Input validation
     assert icd_version == "icd10", "icd_version must be 'icd10' for HFRS."
     assert id_col in df.columns, f"Column '{id_col}' (ID) must be present in input DataFrame." # fmt: skip
     assert code_col in df.columns, f"Column '{code_col}' (ICD code) must be present in input DataFrame." # fmt: skip
 
-    # Drop rows from df with missing codes
-    df = df.filter(pl.col(code_col).is_not_null())
+    hfrs_df = CustomComorbidityIndex(
+        df=df,
+        id_col=id_col,
+        code_col=code_col,
+        icd_version=icd_version,
+        definition_data=DEFINITION_FILE,
+        weight_col_name="weight",
+        score_col_name=SCORE_COL_NAME,
+        return_categories=return_categories,
+    ).with_columns(pl.col(SCORE_COL_NAME).round(1))
 
-    # Load definitions
-    definition_file = "HFRS.csv"
-    definition_file_path = Path(__file__).parent / "common" / definition_file
-    definitions = pl.read_csv(definition_file_path, separator=",")
-
-    assert (
-        "category" in definitions.columns
-    ), "'category' column not found in definition file."
-    assert (
-        "weight" in definitions.columns
-    ), "'weight' column not found in definition file."
-
-    # Only ICD-10 supported for HFRS
-    def detect_categories(chunk):
-        return CustomComorbidityIndex(
-            df=df,
-            id_col=id_col,
-            code_col=code_col,
-            icd_version=icd_version,
-            definition_data=chunk,
-            weight_col_name="weight",
-            score_col_name="HFRS Score",
-            return_categories=True,
-        ).drop("HFRS Score")
-
-    # CustomComorbidityIndex handles at most 63 definition rows, HFRS.csv has 109
-    all_categories = definitions["category"].to_list()
-    df_presence_absence = detect_categories(definitions[:63]).join(
-        detect_categories(definitions[63:]), on=id_col
-    )
-
-    # STEP 2: calculate HFRS score
-    category_weights = dict(zip(definitions["category"], definitions["weight"]))
-    category_weights = {
-        k: v
-        for k, v in category_weights.items()
-        if k is not None and v is not None
-    }
-
-    score_expr = (
-        pl.sum_horizontal(
-            pl.col(cat) * category_weights.get(cat, 0)
-            for cat in all_categories
-            if cat in df_presence_absence.columns and cat in category_weights
-        )
-        .round(1)
-        .alias("HFRS Score")
-    )
-
-    cols = [id_col] + all_categories if return_categories else [id_col]
-    hfrs_df = df_presence_absence.select(*cols, score_expr).cast(
-        {"HFRS Score": float}
-    )
-
-    if is_pandas:
-        return hfrs_df.to_pandas()
-
-    return hfrs_df
+    return hfrs_df.to_pandas() if is_pandas else hfrs_df
