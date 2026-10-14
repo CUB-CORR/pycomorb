@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: "If you use pycomorb in your work, please cite it as below."
+title: "pycomorb: Time-aware comorbidity and frailty scores from ICD codes"
+type: software
+authors:
+  - family-names: Fassbender
+    given-names: "Finn S."
+    email: research@finnfassbender.de
+    affiliation: "Institute of Medical Informatics, Charité - Universitätsmedizin Berlin"
+    orcid: "https://orcid.org/0009-0001-1135-853X"
+repository-code: "https://github.com/CUB-CORR/pycomorb"
+url: "https://github.com/CUB-CORR/pycomorb"
+license: MIT
+abstract: >-
+  Python package that computes comorbidity and frailty scores from ICD-9 and
+  ICD-10 diagnosis codes using polars: Charlson (many mappings and weights),
+  Elixhauser, Combined Comorbidity Score and Hospital Frailty Risk Score.
+  Ships the official year-specific ICD-10-GM and ICD-10-CM code-transfer
+  tables, so codes recorded in different years are made comparable.
+keywords:
+  - comorbidity
+  - Charlson Comorbidity Index
+  - Elixhauser
+  - Combined Comorbidity Score
+  - Hospital Frailty Risk Score
+  - frailty
+  - ICD-10
+  - ICD-10-GM
+  - ICD-10-CM
+  - ICD-9
+  - administrative data
+  - risk adjustment
+  - epidemiology
+  - health informatics
+  - polars
+  - python
+version: "1.20261001.0"  # TODO: update to the new tag at release
+date-released: "2026-10-03"  # TODO: update at release
+# doi: 10.5281/zenodo.XXXXXXX  # TODO: concept DOI, after first Zenodo release

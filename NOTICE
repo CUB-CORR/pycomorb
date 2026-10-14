@@ -1,0 +1,98 @@
+pycomorb: third-party data sources
+==================================
+
+The pycomorb source code is MIT-licensed (see LICENSE). The code lists,
+weights and code-transfer tables in common/ are derived from the sources
+below. Per-file provenance and full references are in common/README.md.
+
+ICD-10-GM (Germany)
+-------------------
+Die vorliegende Ausgabe beruht (1) auf der vollständigen amtlichen Fassung der
+Internationalen statistischen Klassifikation der Krankheiten und verwandter
+Gesundheitsprobleme, 10. Revision, und (2) auf der australischen ICD-10-AM,
+First Edition.
+
+Die englischsprachige Originalausgabe zu (1) wurde 1992 von der
+Weltgesundheitsorganisation (WHO) veröffentlicht als International Statistical
+Classification of Diseases and Related Health Problems, Tenth Revision, Geneva,
+WHO, Vol. 1, 1992; die englischsprachige Originalausgabe zu (2) wurde 1998 vom
+australischen National Centre for Classification in Health veröffentlicht als
+Volume 1 of The International Statistical Classification of Diseases and
+Related Health Problems, 10th Revision, Australian Modification (ICD-10-AM),
+First Edition.
+
+© zu (1): Weltgesundheitsorganisation (WHO) 1992
+© zu (2): Commonwealth of Australia 1998
+
+Der Generaldirektor der Weltgesundheitsorganisation (WHO) hat die
+Übersetzungsrechte für eine deutschsprachige Ausgabe an das Bundesinstitut für
+Arzneimittel und Medizinprodukte (BfArM) vergeben, das für die Übersetzung
+allein verantwortlich ist.
+
+Das Commonwealth of Australia hat die Übersetzungsrechte für eine
+deutschsprachige Ausgabe an das Bundesinstitut für Arzneimittel und
+Medizinprodukte (BfArM) vergeben, das für die Übersetzung allein
+verantwortlich ist.
+
+Herausgegeben vom Bundesinstitut für Arzneimittel und Medizinprodukte (BfArM)
+im Auftrag des Bundesministeriums für Gesundheit (BMG)
+
+Die Erstellung bzw. der Druck erfolgt unter Verwendung der maschinenlesbaren Fassung des
+Bundesinstituts für Arzneimittel und Medizinprodukte (BfArM).
+
+Änderungshinweis (§ 62 UrhG): common/modification_DE/icd10gm.csv wurde aus den
+amtlichen Umsteigertabellen (Überleitungstabellen) des BfArM maschinell
+abgeleitet (Punkte in Codes entfernt, unveränderte Codepaare ausgelassen, Codes
+über Jahre fortgeschrieben, Codes ohne Gegenstück mit UNDEF<Jahr> markiert).
+Es handelt sich nicht um die amtliche Fassung.
+Quelle: https://www.bfarm.de/ (Kodiersysteme > Klassifikationen > ICD-10-GM)
+
+ICD-10-CM (USA)
+---------------
+Conversion tables and code files from the U.S. Centers for Medicare & Medicaid
+Services (CMS) and the CDC National Center for Health Statistics. Works of the
+U.S. Government (public domain, 17 U.S.C. § 105). Modified by pycomorb
+(common/modification_US/icd10cm.csv).
+
+AHRQ Elixhauser Comorbidity Software
+------------------------------------
+Elixhauser Comorbidity Software, Version 3.7 (ICD-9-CM), and Elixhauser
+Comorbidity Software Refined for ICD-10-CM, v2026.1. Healthcare Cost and
+Utilization Project (HCUP). Agency for Healthcare Research and Quality,
+Rockville, MD. https://hcup-us.ahrq.gov/
+Weights: Moore BJ et al. Med Care 2017;55(7):698-705.
+doi:10.1097/MLR.0000000000000735
+
+NHS England: Summary Hospital-level Mortality Indicator (SHMI)
+--------------------------------------------------------------
+Summary Hospital-level Mortality Indicator (SHMI), Indicator specification,
+published June 2026 (v1.60). Copyright © 2026 NHS England.
+Charlson categories and weights in common/CHARLSON_UK_SHMI_v1.60.csv are taken
+from this specification.
+https://digital.nhs.uk/data-and-information/publications/ci-hub/summary-hospital-level-mortality-indicator-shmi
+
+Germany Charlson mapping
+------------------------
+Sokołowski PP, Hagmann M, Maros ME, Kamdje Wabo G, Meerjanssen JM, Siegel F.
+JMIR Med Inform 2026;14:e93923. doi:10.2196/93923 (CC BY 4.0).
+Mapping files from github.com/psokolo/comorbidity_score (MIT).
+
+Sweden Charlson mapping
+-----------------------
+Ludvigsson JF, Appelros P, Askling J, et al. Adaptation of the Charlson
+Comorbidity Index for Register-Based Research in Sweden. Clin Epidemiol
+2021;13:21-41. doi:10.2147/CLEP.S282475. Code lists follow the authors' SAS
+code (github.com/bjoroeKI/Charlson-comorbidity-index-revisited).
+
+Published algorithms
+--------------------
+Code assignments and weights from the peer-reviewed publications cited in
+common/README.md (Charlson, Deyo, Romano, D'Hoore, Sundararajan, Quan,
+Armitage, Thygesen, Schneeweiss, Elixhauser, van Walraven, Thompson, Sharma,
+Gagne, Sun, Gilbert and others). Only the factual code lists and numeric
+weights are used; each is cited to its source.
+
+Related software
+----------------
+Inspired by the R package comorbidity (Gasparini) and the Python package
+comorbidipy (Chandrabalan, MIT).

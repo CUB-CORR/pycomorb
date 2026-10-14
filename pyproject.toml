@@ -2,7 +2,7 @@
 name = "pycomorb"
 dynamic = ["version"]
 authors = [
-  { name="Finn S. Fassbender", email="finn.fassbender@charite.de" },
+  { name="Finn S. Fassbender", email="research@finnfassbender.de" },
 ]
 description = "Comorbidity and frailty score calculation utilities (Charlson, Elixhauser, Gagne, HFRS) using polars"
 readme = "README.md"
@@ -17,7 +17,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 license = "MIT"
-license-files = ["LICEN[CS]E*"]
+license-files = ["LICEN[CS]E*", "NOTICE"]
 
 [build-system]
 requires = ["setuptools>=61", "setuptools-scm>=8"]
@@ -32,3 +32,10 @@ pycomorb = ["common/**/*.csv", "common/**/*.yaml"]
 
 [tool.setuptools_scm]
 version_file = "pycomorb/_version.py"
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+filterwarnings = ["ignore::DeprecationWarning"]
