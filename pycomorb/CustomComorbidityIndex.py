@@ -115,20 +115,31 @@ def CustomComorbidityIndex(
     ), f"'{weight_col_name}' column not found in definition file."
 
     df = check_code_dtype(df, code_col)
-    all_ids = df.select(id_col).unique()
-    df = df.filter(pl.col(code_col).is_not_null() & (clean_code_expr(code_col) != ""))
 
     # Year gating only applies when both year_col and a year column are given
     year_aware = year_col is not None and "year" in definitions.columns
 
     def process_single_icd(df, icd_col_name):
+        # Patients without a usable code stay in the result with all categories 0
+        ids = df.select(id_col).unique()
+        df = df.filter(pl.col(code_col).is_not_null())
+
+        # Validation and cleaning only touch the unique codes, the diagnosis rows keep their
+        # raw codes and are joined on them below. Blank codes match nothing.
+        unique_codes = (
+            df.select(code_col)
+            .unique()
+            .with_columns(clean_code_expr(code_col).alias("clean"))
+            .filter(pl.col("clean") != "")
+        )
+
+        categories_list = definitions["category"].drop_nulls().unique(maintain_order=True).to_list()
+        if unique_codes.is_empty():  # no codes of this ICD version: nothing present
+            return ids.with_columns(pl.lit(0).cast(int).alias(c) for c in categories_list), categories_list
+
         # Prepare mapping DataFrame: prefix, bit, since. Every definition row is one bit in a
         # per-patient mask; a category is present if all bits of one of its groups are set,
         # where a group is a single row or the rows sharing an and_group.
-        categories_list = definitions["category"].drop_nulls().unique(maintain_order=True).to_list()
-        if df.is_empty():  # no codes of this ICD version: nothing present
-            empty = df.select(id_col).unique()
-            return empty.with_columns(pl.lit(0).cast(int).alias(c) for c in categories_list), categories_list
         required, code_map_rows = defaultdict(lambda: defaultdict(int)), []
         for i, row in enumerate(definitions.iter_rows(named=True)):
             if row["category"] is None or row.get(icd_col_name) is None:
@@ -141,11 +152,7 @@ def CustomComorbidityIndex(
                 )
         code_map = pl.DataFrame(code_map_rows)
 
-        # Get all unique ICD codes in the data; validation and cleaning only touch these,
-        # the diagnosis rows keep their raw codes and are joined on them below
         code_prefixes = code_map.select("prefix").to_series().to_list()
-        unique_codes = df.select(code_col).unique()
-        unique_codes = unique_codes.with_columns(clean_code_expr(code_col).alias("clean"))
         longest_code = max(unique_codes["clean"].to_list(), key=len)
 
         # Create a DataFrame with all possible prefixes, then find the best match
@@ -182,10 +189,9 @@ def CustomComorbidityIndex(
         if year_aware:
             matches = matches.filter(pl.col(year_col) >= pl.col("since"))
 
+        masks_by_id = matches.group_by(id_col).agg(pl.col("bit").bitwise_or().alias("mask"))
         df_presence_absence = (
-            df.select(id_col)
-            .unique()
-            .join(matches.group_by(id_col).agg(pl.col("bit").bitwise_or().alias("mask")), on=id_col, how="left")
+            ids.join(masks_by_id, on=id_col, how="left")
             .with_columns(pl.col("mask").fill_null(0))
             .select(
                 id_col,
@@ -230,20 +236,15 @@ def CustomComorbidityIndex(
             df10, on=id_col, how="full", suffix="_right", coalesce=True
         )
         # both halves report every category, so each has a "_right" counterpart
-        for cat in all_categories:
-            df_combined = df_combined.with_columns(
-                pl.max_horizontal(pl.col(cat), pl.col(f"{cat}_right")).alias(cat)
-            )
-        df_presence_absence = df_combined.select([id_col] + all_categories)
+        df_presence_absence = df_combined.select(
+            id_col,
+            *(pl.max_horizontal(cat, f"{cat}_right").alias(cat) for cat in all_categories),
+        )
     else:
         icd_col_name = f"{icd_version}_codes"
         df_presence_absence, all_categories = process_single_icd(
             df, icd_col_name
         )
-
-    df_presence_absence = all_ids.join(df_presence_absence, on=id_col, how="left").with_columns(
-        pl.col(cat).fill_null(0) for cat in all_categories
-    )
 
     # STEP 2: calculate score
     category_weights = dict(
