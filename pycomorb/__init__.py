@@ -9,6 +9,7 @@ import pandas as pd
 import polars as pl
 
 from .CharlsonComorbidityIndex import CharlsonComorbidityIndex
+from .Reporting import comorbidity_reporting, read_reporting
 from .CombinedComorbidityScore import CombinedComorbidityScore
 from .CustomComorbidityIndex import CustomComorbidityIndex
 from .ElixhauserComorbidityIndex import ElixhauserComorbidityIndex
