@@ -131,3 +131,22 @@ def test_more_than_63_definitions(tmp_path):
 def test_pandas_roundtrip(tmp_path):
     res = pc.comorbidity("custom", ICD10.to_pandas(), definition_data=write(tmp_path))
     assert isinstance(res, pd.DataFrame)
+
+
+def test_category_over_several_rows_with_both_icd_versions():
+    definitions = pl.DataFrame(
+        {
+            "category": ["A", "A"],
+            "icd9_codes": ["410", None],
+            "icd10_codes": [None, "I21"],
+            "weight": [1, 1],
+        }
+    )
+    df = pl.DataFrame(
+        {"id": [1, 2], "code": ["410", "I21"], "version": ["ICD-9", "ICD-10"]}
+    )
+    result = pc.comorbidity(
+        "custom", df, icd_version="icd9_10", icd_version_col="version", definition_data=definitions,
+        weight_col_name="weight", return_categories=True,
+    )  # fmt: skip
+    assert result.sort("id")["A"].to_list() == [1, 1]

@@ -229,7 +229,7 @@ def CustomComorbidityIndex(
         all_categories_set = set(cats9) | set(cats10)
         all_categories = [
             cat
-            for cat in definitions["category"].to_list()
+            for cat in dict.fromkeys(definitions["category"].to_list())
             if cat in all_categories_set and cat is not None
         ]
         df_combined = df9.join(
