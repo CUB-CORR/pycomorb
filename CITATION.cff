@@ -34,6 +34,6 @@ keywords:
   - health informatics
   - polars
   - python
-version: "1.20261001.0"  # TODO: update to the new tag at release
-date-released: "2026-10-03"  # TODO: update at release
+version: "1.20261001.1"
+date-released: "2026-10-15"
 # doi: 10.5281/zenodo.XXXXXXX  # TODO: concept DOI, after first Zenodo release
