@@ -1,0 +1,26 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        include:
+          - python-version: "3.10"
+            polars: "polars==1.21.0"  # lowest supported version
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # setuptools-scm needs the tags
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install ".[test]" ${{ matrix.polars }}
+      - run: pytest -q --cov
