@@ -111,6 +111,44 @@ charlson = comorbidity(
 
 See the docstrings in each module for details on arguments and supported variants.
 
+### Reporting
+
+`comorbidity_reporting` documents the exact definition behind a score: a methods table to paste into a manuscript, plus the weights, code list and hierarchy rules used. With `path`, it writes them to a folder. `read_reporting` reads such a folder back into arguments for a `"custom"` index, so a published definition can be reused.
+
+```python
+from pycomorb import comorbidity, comorbidity_reporting, read_reporting
+
+template, weights, codes, hierarchy = comorbidity_reporting(
+    "charlson",
+    implementation="quan",
+    icd_version="icd10",
+    path="charlson_report",  # Writes template.md, weights.csv, codes.csv, hierarchy.csv
+    data_sources="Example EHR",  # Optional study information
+    look_back_period="1 year",
+)
+
+# Recompute the score from the reported definition
+custom = comorbidity("custom", df, id_col="id", code_col="code", **read_reporting("charlson_report"))
+```
+
+The resulting `template.md` (study information you don't pass stays empty, to be filled in by hand):
+
+| domain | information |
+|---|---|
+| Data source(s) | Example EHR |
+| Method of data extraction | |
+| Comorbidity weighting reference | Charlson et al. (1987) |
+| Comorbidity weighting list | weights.csv |
+| Disease classification system | ICD-10 |
+| Disease code reference | Quan et al. (2005) |
+| Disease code list | codes.csv |
+| Coding practice | |
+| Age adjustment | Age points: 0 (<50 years), 1 (50-59), 2 (60-69), 3 (70-79), 4 (>=80) |
+| Hierarchy rules | 'Diabetes with chronic complication' replaces 'Diabetes without chronic complication'; 'Moderate or severe liver disease' replaces 'Mild liver disease'; 'Metastatic solid tumor' replaces 'Any malignancy, including lymphoma and leukemia, except malignant neoplasm of skin' |
+| Look-back period | 1 year |
+| Timing of data extraction | |
+| Software | pycomorb 1.20261001.1 |
+
 ### License and Documentation
 
 ---

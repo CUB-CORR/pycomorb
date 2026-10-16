@@ -16,9 +16,22 @@ dependencies = [
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
 ]
+keywords = ["comorbidity", "Charlson", "Elixhauser", "frailty", "ICD-10", "polars"]
 license = "MIT"
 license-files = ["LICEN[CS]E*", "NOTICE"]
+
+[project.urls]
+Homepage = "https://github.com/CUB-CORR/pycomorb"
+Repository = "https://github.com/CUB-CORR/pycomorb"
+Issues = "https://github.com/CUB-CORR/pycomorb/issues"
+Changelog = "https://github.com/CUB-CORR/pycomorb/releases"
 
 [build-system]
 requires = ["setuptools>=61", "setuptools-scm>=8"]
