@@ -1,5 +1,7 @@
 # pycomorb
 
+[![DOI](https://zenodo.org/badge/1031788374.svg)](https://doi.org/10.5281/zenodo.23436346)
+
 Python package to calculate comorbidity and frailty scores using ICD codes and polars DataFrames.
 
 ## Overview

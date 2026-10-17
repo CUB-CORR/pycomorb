@@ -36,4 +36,4 @@ keywords:
   - python
 version: "1.20261001.1"
 date-released: "2026-10-15"
-# doi: 10.5281/zenodo.XXXXXXX  # TODO: concept DOI, after first Zenodo release
+doi: 10.5281/zenodo.23436346
