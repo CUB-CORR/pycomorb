@@ -139,6 +139,12 @@ def test_rcs_counts_conditions_without_age():
     assert res[CHARLSON][0] == 2
 
 
+@pytest.mark.parametrize("weights,age_points", [("charlson", 4), ("schneeweiss", 0), ("quan", 0), ("rcs", 0), ("uk_shmi", 0)])
+def test_age_points_only_with_charlson_weights(weights, age_points):
+    res = quiet("charlson", patient(["Z00.0"], age=85), weights=weights, return_categories=True)
+    assert res["Age Score"][0] == age_points
+
+
 def test_uk_shmi_negative_total_is_floored():
     category = "Diabetes complications"  # SHMI weights this category at -1
     row = next(r for r in read("CHARLSON_UK_SHMI_v1.60") if r["category"] == category)

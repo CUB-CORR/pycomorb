@@ -69,7 +69,7 @@ def weight_of(table, category, column):
 
 
 def category_names(stem):
-    names = (row["category"] for row in read(stem) if row["category"] != "Age")
+    names = (row["category"] for row in read(stem))
     return list(dict.fromkeys(name for name in names if name))
 
 
@@ -124,7 +124,7 @@ def targeted_patients(defs, col):
     patients, groups = [], {}
     for row in defs:
         code = (row.get(col) or "").split("|")[0].strip()
-        if not code or row["category"] == "Age":
+        if not code:
             continue
         patients.append((60, [(code, 2026)]))
         if row.get("and_group"):
@@ -141,9 +141,6 @@ def make_patients(defs, ver, seed):
     col = f"{ver}_codes"
     pool = list(NOISE)
     for row in defs:
-        # the Age row holds placeholder codes (XXXX / YYYY)
-        if row["category"] == "Age":
-            continue
         for prefix in (row.get(col) or "").split("|"):
             if prefix.strip():
                 pool += [prefix.strip(), prefix.strip() + str(rnd.randint(0, 9))]
@@ -192,11 +189,10 @@ def test_charlson_matches_oracle(impl, weights, ver):
     for age, records in patients:
         present = present_categories(defs, ver, records, impl in YEAR_AWARE)
         present = apply_exclusions(present, renames, CHARLSON_RULES)
-        present.pop("Age", None)
         index = weighted_sum(present, renames, table, column)
         if weights == "uk_shmi":
             index = max(index, 0)
-        age_score = 0 if weights == "rcs" else age_points(age)
+        age_score = age_points(age) if weights == "charlson" else 0
         expected.append(
             {
                 **present,
@@ -288,7 +284,6 @@ def test_mixed_versions_take_union_of_both_catalogues(impl):
         present10 = present_categories(defs, "icd10", records10, False)
         present = {c: max(present9[c], present10[c]) for c in present9}
         present = apply_exclusions(present, renames, CHARLSON_RULES)
-        present.pop("Age", None)
         index = weighted_sum(present, renames, table, "charlson_weights")
         expected.append(
             {

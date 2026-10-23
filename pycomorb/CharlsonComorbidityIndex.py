@@ -112,7 +112,7 @@ def CharlsonComorbidityIndex(
         df (pl.DataFrame): Input data containing at least ``id_col``, ``code_col``, and ``age_col``.
         id_col (str, optional): Column name containing unique identifiers. Defaults to ``"id"``.
         code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
-        age_col (str, optional): Column name containing patient ages. Defaults to ``"age"``.
+        age_col (str, optional): Column name containing patient ages (age points are only added for ``weights="charlson"``). Defaults to ``"age"``.
         icd_version (str, optional): ICD version; one of ``"icd9"``, ``"icd10"``, or ``"icd9_10"``. Defaults to ``"icd10"``.
         icd_version_col (str, optional): Column name with ICD version labels when ``icd_version`` is ``"icd9_10"``. Defaults to ``None``.
         year_col (str, optional): Column name with each record's ICD-10-GM catalogue year. Required when ``implementation`` is ``"sokolowski"`` (ignored otherwise), since that mapping is year-specific. Defaults to ``None``.
@@ -205,8 +205,8 @@ def CharlsonComorbidityIndex(
         df_charlson = df_charlson.with_columns(pl.col(SCORE_COL_NAME).clip(lower_bound=0))
 
     # STEP 3: Combine Age Score and Comorbidity Score
-    # RCS Charlson is a simple count of conditions, without an age component
-    if weights == "rcs":
+    # Only the Charlson weights include age points
+    if weights != "charlson":
         age_scores = age_scores.with_columns(pl.lit(0).alias("Age Score"))
 
     df_charlson = df_charlson.join(

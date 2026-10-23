@@ -24,7 +24,7 @@ If the chosen `implementation` covers only one ICD version, `icd_version` is swi
 
 ## Charlson Comorbidity Index
 
-Score = sum of category weights + age points. The original index is [Charlson 1987](references.md#charlson1987) (see also [Charlson 1994](references.md#charlson1994)). Age points are 0 (<50), 1 (50–59), 2 (60–69), 3 (70–79), 4 (≥80) and are added for every weighting except `rcs`. A patient's age is the highest value in their rows; a missing age gives 0 points.
+Score = sum of category weights + age points. The original index is [Charlson 1987](references.md#charlson1987) (see also [Charlson 1994](references.md#charlson1994)). Age points are 0 (<50), 1 (50–59), 2 (60–69), 3 (70–79), 4 (≥80) and are added for `weights="charlson"` only. `schneeweiss`, `quan`, `rcs` and `uk_shmi` define no age points; the implementations (code lists) never define age points themselves. A patient's age is the highest value in their rows; a missing age gives 0 points.
 
 Hierarchy: *diabetes with chronic complication* replaces *diabetes without*, *moderate or severe liver disease* replaces *mild liver disease*, and *metastatic solid tumor* replaces *any malignancy*.
 
@@ -48,8 +48,8 @@ Hierarchy: *diabetes with chronic complication* replaces *diabetes without*, *mo
 | Value | Reference | Notes |
 |---|---|---|
 | `charlson` (default) | [Charlson 1987](references.md#charlson1987) | |
-| `schneeweiss` | [Schneeweiss 2003](references.md#schneeweiss2003) | |
-| `quan` | [Quan 2011](references.md#quan2011) | |
+| `schneeweiss` | [Schneeweiss 2003](references.md#schneeweiss2003) | No age points |
+| `quan` | [Quan 2011](references.md#quan2011) | No age points |
 | `rcs` | [Armitage 2010](references.md#armitage2010) | Every category counts 1; no age points |
 | `uk_shmi` | [NHS Digital 2026](references.md#nhs2026) | Negative totals are set to 0 |
 

@@ -57,7 +57,7 @@ REPORT_DOMAINS = [
 #   icd_version: Implementations that only have one ICD version
 #   own_weights: Implementations that always use their own weights
 #   weight_col: Column holding the weights; weight_cols: the same for weights where it differs
-#   age: weights -> description of the age adjustment; None is used for all weights not listed
+#   age: weights -> description of the age adjustment
 SCORES = {
     "charlson": {
         "files": charlson.DEFINITION_FILES,
@@ -90,7 +90,7 @@ SCORES = {
         "own_weights": {"rcs": "rcs", "uk_shmi": "uk_shmi"},
         "weight_col": "{weights}_weights",
         "weight_cols": {},
-        "age": {None: AGE_POINTS, "rcs": "Not applied"},
+        "age": lambda weights: AGE_POINTS if weights == "charlson" else "Not applied",
     },
     "elixhauser": {
         "files": elixhauser.DEFINITION_FILES,
@@ -118,7 +118,7 @@ SCORES = {
         "weight_col": "{weights}_weights",
         # The AHRQ weights come in an ICD-9 and an ICD-10 column
         "weight_cols": {"ahrq": "ahrq_{icd_version}_weights"},
-        "age": {None: "Not applicable"},
+        "age": lambda weights: "Not applicable",
     },
     "combined": {
         "files": {None: "GAGNE.csv"},
@@ -132,7 +132,7 @@ SCORES = {
         "own_weights": {},
         "weight_col": "weights",
         "weight_cols": {},
-        "age": {None: "Not applicable"},
+        "age": lambda weights: "Not applicable",
     },
     "hfrs": {
         "files": {None: "HFRS.csv"},
@@ -144,7 +144,7 @@ SCORES = {
         "own_weights": {},
         "weight_col": "weight",
         "weight_cols": {},
-        "age": {None: "Not applicable"},
+        "age": lambda weights: "Not applicable",
     },
 }
 
@@ -171,17 +171,16 @@ def score_setup(score, implementation, weights, icd_version):
         definitions = pl.read_csv(Path(__file__).parent / "common" / file)
         rules = []
 
-    weight_col = spec["weight_cols"].get(weights, spec["weight_col"])
+    weight_col = spec["weight_cols"].get(weights, spec["weight_col"]).format(weights=weights, icd_version=icd_version)
 
     return {
-        # The Charlson age row only holds placeholders
-        "definitions": definitions.filter(pl.col("category") != "Age"),
-        "weight_col": weight_col.format(weights=weights, icd_version=icd_version),
+        "definitions": definitions,
+        "weight_col": weight_col,
         "rules": rules,
         "icd_version": icd_version,
         "code_ref": spec["code_refs"][implementation],
         "weight_ref": spec["weight_refs"][weights],
-        "age": spec["age"].get(weights, spec["age"][None]),
+        "age": spec["age"](weights),
     }
 
 

@@ -1,5 +1,4 @@
 index,category,icd9_codes,icd10_codes
-0,Age,,YYYY|YYYY
 1,Acute myocardial infarction,,I21|I22|I23|I252|I258
 2,Congestive heart failure,,I50
 3,Peripheral vascular disease,,I71|I739|I790|R02|Z958|Z959

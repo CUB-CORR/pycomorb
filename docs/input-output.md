@@ -24,7 +24,7 @@ One row per patient:
 
 | Score | Columns without `return_categories` | Added by `return_categories=True` |
 |---|---|---|
-| `charlson` | `id`, `Charlson Comorbidity Index`, `Charlson Age-Comorbidity Score` | `Age`, one 0/1 column per category (before the index), `Age Score` |
+| `charlson` | `id`, `Charlson Comorbidity Index`, `Charlson Age-Comorbidity Score` | one 0/1 column per category (before the index), `Age Score` |
 | `elixhauser` | `id`, `Elixhauser Comorbidity Index` | one 0/1 column per category |
 | `combined` | `id`, `Combined Comorbidity Score` | one 0/1 column per category |
 | `hfrs` | `id`, `HFRS Score` | one 0/1 column per category |

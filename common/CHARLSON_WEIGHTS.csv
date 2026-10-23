@@ -1,5 +1,4 @@
 index,category,charlson_weights,schneeweiss_weights,rcs_weights,quan_weights,uk_shmi_weights
-0,Age,1,,,0,1
 1,Myocardial infarction,1,1,1,0,5
 2,Congestive heart failure,1,2,1,2,13
 3,Peripheral vascular disease,1,1,1,0,6

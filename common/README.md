@@ -66,6 +66,8 @@ Original index:
 
 ## Weights (sorted by year)
 
+Age points (0-4) are only part of the Charlson weights (Charlson et al. 1987/1994); the other weightings are defined on the conditions alone.
+
 - **Charlson et al. 1987** (`weights="charlson"`): see the original index above
 - **Schneeweiss et al. 2003** (`weights="schneeweiss"`):<br>Schneeweiss S, Wang PS, Avorn J, Glynn RJ. Improved comorbidity adjustment for predicting mortality in Medicare populations. Health Serv Res. 2003 Aug;38(4):1103-20. doi: [10.1111/1475-6773.00165](https://doi.org/10.1111/1475-6773.00165). PMID: 12968819; PMCID: PMC1360935
 - **RCS, Armitage and van der Meulen 2010** (`weights="rcs"`): see the RCS mapping above

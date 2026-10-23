@@ -1,5 +1,4 @@
 index,category,icd9_codes,icd10_codes
-0,Age,XXXX|XXXX,
 1,Myocardial infarction,410|412,
 2,Congestive heart failure,398|402|428,
 3,Peripheral vascular disease,440|441|442|443|444|445|446|447,
