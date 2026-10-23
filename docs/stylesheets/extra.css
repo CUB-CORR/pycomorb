@@ -1,0 +1,12 @@
+/* No line breaks inside inline code, citation links or the first table column */
+.md-typeset :not(pre) > code,
+.md-typeset a[href*="references"],
+.md-typeset table:not([class]) :is(th, td):first-child {
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+/* ...except in API headings, where signatures are long */
+.md-typeset .doc-heading code {
+  white-space: normal;
+}

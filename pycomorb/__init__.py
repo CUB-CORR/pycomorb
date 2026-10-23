@@ -79,7 +79,7 @@ def comorbidity(
         icd_modification (str, optional): ICD modification to apply (``"icd10gm"`` or ``"icd10cm"``). When provided, codes are mapped to the ``icd_modification_target_year``. Defaults to ``None``.
         icd_modification_target_year (int, optional): Target year for ICD modification mappings (ICD-10-GM: 2004-2026, ICD-10-CM: 2015-2027). Defaults to the earliest year of the chosen modification (``2004`` for ``"icd10gm"``, ``2015`` for ``"icd10cm"``).
         implementation (str, optional): Implementation variant for the selected score (for example ``"quan"``, ``"deyo"``, ``"elixhauser"``). Defaults to ``None``.
-        weights (str, optional): Weighting scheme for the Elixhauser index. Defaults to ``None``.
+        weights (str, optional): Weighting scheme for the Charlson and Elixhauser indices (e.g. ``"quan"``, ``"van_walraven"``). Defaults to ``None``, which selects the score's default.
         definition_data (pl.DataFrame | pd.DataFrame | Path | str, optional): Definition table for custom indices, either as a DataFrame or a path to a CSV file. Defaults to ``None``.
         definition_file_path (str, optional): Path to a CSV containing custom index definitions. Ignored when ``definition_data`` is a DataFrame. Defaults to ``None``.
         weight_col_name (str, optional): Column name with weights in ``definition_data``. Defaults to ``"weights"``.
@@ -91,7 +91,7 @@ def comorbidity(
         pl.DataFrame | pd.DataFrame: DataFrame containing the calculated score and, when ``return_categories`` is ``True``, the category indicators. If the input was a pandas DataFrame, the output matches that type.
 
     Raises:
-        ValueError: If the requested ``score`` or ``icd_modification`` is not supported, or required columns are missing.
+        ValueError: If the requested ``score`` or ``icd_modification`` is not supported, or if a Charlson calculation lacks ``age_col``.
 
     Examples:
         Compute a Charlson score with category indicators and automatic ICD-10-GM harmonization:

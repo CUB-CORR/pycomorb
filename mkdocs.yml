@@ -1,0 +1,40 @@
+site_name: pycomorb
+site_description: Time-aware comorbidity and frailty scores from ICD codes
+repo_url: https://github.com/CUB-CORR/pycomorb
+theme:
+  name: material
+  features: [content.code.copy, navigation.sections]
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle: {icon: material/weather-night, name: Dark mode}
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle: {icon: material/weather-sunny, name: Light mode}
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            docstring_options:
+              returns_named_value: false
+            show_root_heading: true
+            annotations_path: source
+markdown_extensions:
+  - admonition
+  - tables
+  - pymdownx.superfences
+nav:
+  - Home: index.md
+  - Scores: scores.md
+  - Input and output: input-output.md
+  - ICD modification: icd-modification.md
+  - Custom index: custom.md
+  - Reporting: reporting.md
+  - References: references.md
+  - API: api.md
+  - Development: development.md
+extra_css:
+  - stylesheets/extra.css

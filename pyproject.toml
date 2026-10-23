@@ -49,6 +49,7 @@ version_file = "pycomorb/_version.py"
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov"]
+docs = ["mkdocs-material", "mkdocstrings[python]"]
 
 [tool.pytest.ini_options]
 testpaths = ["test"]

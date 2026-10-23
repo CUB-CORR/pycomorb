@@ -124,8 +124,7 @@ def CharlsonComorbidityIndex(
         pl.DataFrame: DataFrame containing ``id_col``, the ``"Charlson Age-Comorbidity Score"`` column, and, when ``return_categories`` is ``True``, category indicators and the ``"Age Score"`` column.
 
     Raises:
-        AssertionError: If required columns are missing.
-        ValueError: If ``implementation`` is unsupported.
+        AssertionError: If ``implementation`` or ``weights`` is unsupported, or if required columns are missing.
     """
 
     icd_version = coerce_icd_version(icd_version, implementation, ICD9_ONLY, ICD10_ONLY)

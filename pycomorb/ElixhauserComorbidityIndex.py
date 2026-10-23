@@ -94,7 +94,7 @@ def ElixhauserComorbidityIndex(
 
     Raises:
         AssertionError: If ``implementation`` or ``weights`` is outside the supported values, or if ``implementation="ahrq_icd10"`` and ``year_col`` is missing.
-        ValueError: If an unsupported ``implementation`` or ``weights`` argument passes validation safeguards.
+        ValueError: If ``weights="ahrq"`` is used with ``icd_version="icd9_10"``.
     """
 
     icd_version = coerce_icd_version(icd_version, implementation, ICD9_ONLY, ICD10_ONLY)
