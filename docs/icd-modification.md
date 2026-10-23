@@ -47,7 +47,13 @@ get_icd10gm(df, target_year=2024)
 └─────┴───────┴──────┴──────────┘
 ```
 
-Mapped codes are written to a new column `icd_<target_year>` (without dots). `comorbidity()` uses it as the code column. `get_icd10gm(data, code_col="code", year_col="year", target_year=2024)` and `get_icd10cm(...)` return the DataFrame with this column; note that their default target year is 2024, not the earliest year.
+Mapped codes are written to a new column `icd_<target_year>` (without dots). `comorbidity()` uses it as the code column. `get_icd10gm()` and `get_icd10cm()` return the DataFrame with this column:
+
+```python
+get_icd10gm(df, code_col="code", year_col="year", target_year=2024)
+```
+
+Note that their default target year is 2024, not the earliest year.
 
 Codes with a year outside the table (for example 2030 for ICD-10-CM) are used unchanged and a `UserWarning` lists the years.
 

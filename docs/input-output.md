@@ -22,6 +22,8 @@ Codes are cleaned (dots removed, whitespace stripped, upper-cased) and then matc
 
 One row per patient:
 
+<div class="wide-2 wide-3" markdown="1">
+
 | Score | Columns without `return_categories` | Added by `return_categories=True` |
 |---|---|---|
 | `charlson` | `id`, `Charlson Comorbidity Index`, `Charlson Age-Comorbidity Score` | one 0/1 column per category (before the index), `Age Score` |
@@ -30,11 +32,15 @@ One row per patient:
 | `hfrs` | `id`, `HFRS Score` | one 0/1 column per category |
 | `custom` | `id`, `score_col_name` | one 0/1 column per category |
 
+</div>
+
 - The Charlson index is the sum of the category weights; the *Age-Comorbidity Score* adds the age points.
 - Patients without a matching code are kept, with all categories 0.
 - **The row order of the result is not the order of the input.** Sort or join on `id` if you need an order.
 
 ## Warnings and errors
+
+<div class="wide-2 wide-3" markdown="1">
 
 | Type | Message | Cause |
 |---|---|---|
@@ -52,6 +58,8 @@ One row per patient:
 | `UserWarning` | Implementation 'deyo' only uses ICD-9. Setting ICD version to 'icd9' | The implementation covers one ICD version only; your `icd_version` was replaced |
 | `UserWarning` | Implementation 'rcs' requires 'rcs_weights'. Overriding weights=… | `weights` other than the implementation's own for `rcs`, `uk_shmi`, `ahrq_icd9`, `ahrq_icd10` |
 | `UserWarning` | Codes with year(s) [2030] in column 'year' lie outside the transfer table (2015-2027) and are used unchanged | [ICD modification](icd-modification.md) for years the table does not cover |
+
+</div>
 
 ## Validation
 

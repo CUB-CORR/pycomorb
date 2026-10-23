@@ -20,6 +20,8 @@ custom = comorbidity("custom", df, id_col="id", code_col="code", **read_reportin
 
 The call above writes four files. `template.md` is the methods table to paste into a manuscript:
 
+<div class="wide-2" markdown="1">
+
 | domain | information |
 |---|---|
 | Data source(s) | Example EHR |
@@ -35,6 +37,8 @@ The call above writes four files. `template.md` is the methods table to paste in
 | Look-back period | 1 year |
 | Timing of data extraction | |
 | Software | pycomorb 1.20261001.1 |
+
+</div>
 
 The other files hold the definition itself. `weights.csv` and `codes.csv` have one row per category and per code (first rows shown); `row` links a weight to its codes.
 

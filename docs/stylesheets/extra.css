@@ -1,6 +1,6 @@
 /* No line breaks inside inline code, citation links or the first table column */
 .md-typeset :not(pre) > code,
-.md-typeset a[href*="references"],
+.md-typeset a[href*="references"]:not([href*="ahrq-icd10"]),
 .md-typeset table:not([class]) :is(th, td):first-child {
   white-space: nowrap;
   word-break: keep-all;
@@ -9,4 +9,11 @@
 /* ...except in API headings, where signatures are long */
 .md-typeset .doc-heading code {
   white-space: normal;
+}
+
+/* Widen the columns that hold long text in tables wrapped in <div class="wide-N"> */
+:is(.wide-2 :is(th, td):nth-child(2), 
+    .wide-3 :is(th, td):nth-child(3),
+    .wide-4 :is(th, td):nth-child(4)) {
+  min-width: 14rem;
 }

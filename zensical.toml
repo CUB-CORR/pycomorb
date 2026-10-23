@@ -32,6 +32,7 @@ toggle.name = "Light mode"
 
 [project.markdown_extensions]
 admonition = {}
+md_in_html = {}
 tables = {}
 pymdownx.superfences = {}
 

@@ -2,6 +2,8 @@
 
 `score="custom"` scores your own category definitions. Pass them as a polars (or pandas) DataFrame in `definition_data`, or as a CSV in `definition_file_path`.
 
+<div class="wide-2 wide-3" markdown="1">
+
 | column | content |
 |---|---|
 | `category` | category name |
@@ -9,6 +11,8 @@
 | weight column | name it with `weight_col_name` (default `"weights"`) |
 | `and_group` (optional) | rows of one `category` with the same non-empty `and_group` count only if **all** are present |
 | `year` (optional) | a row applies from this year on. Needs a year column in the data: `year_col` (default `"year"`) is used automatically if that column exists |
+
+</div>
 
 A category is present if any of its rows matches (OR). Codes are matched by [prefix](input-output.md#how-codes-are-matched).
 

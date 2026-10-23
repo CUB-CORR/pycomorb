@@ -2,6 +2,8 @@
 
 `comorbidity(score=..., ...)` calculates one of the scores below. `score` is case-insensitive; the result has one row per `id_col` with the score in the column named in the table.
 
+<div class="wide-2 wide-3" markdown="1">
+
 | `score` | Aliases | Output column | Default `implementation` | Default `weights` |
 |---|---|---|---|---|
 | `charlson` | `cci`, `charlsoncomorbidityindex`, `charlson_comorbidity_index` | `Charlson Age-Comorbidity Score` | `quan` | `charlson` |
@@ -10,7 +12,11 @@
 | `hfrs` | `hospitalfrailtyriskscore`, `hospital_frailty_risk_score` | `HFRS Score` | none | none |
 | `custom` | `customcomorbidityindex` | `score_col_name` (default `Custom Comorbidity Score`) | none | none |
 
+</div>
+
 Options shared by all scores:
+
+<div class="wide-3" markdown="1">
 
 | Argument | Default | Meaning |
 |---|---|---|
@@ -19,6 +25,8 @@ Options shared by all scores:
 | `year_col` | `"year"` | Year of the code. Required for the year-specific implementations below and for [ICD modification](icd-modification.md) |
 | `icd_version` | `"icd10"` | `"icd9"`, `"icd10"` or `"icd9_10"` (the latter needs `icd_version_col` with the values `"ICD-9"` / `"ICD-10"` per row) |
 | `return_categories` | `False` | Also return one 0/1 column per category (and `Age Score` for Charlson) |
+
+</div>
 
 If the chosen `implementation` covers only one ICD version, `icd_version` is switched to it with a `UserWarning`. Full citations are in [References](references.md).
 
@@ -29,6 +37,8 @@ Score = sum of category weights + age points. The original index is [Charlson 19
 Hierarchy: *diabetes with chronic complication* replaces *diabetes without*, *moderate or severe liver disease* replaces *mild liver disease*, and *metastatic solid tumor* replaces *any malignancy*.
 
 ### `implementation`
+
+<div class="wide-4" markdown="1">
 
 | Value | Reference | ICD | Notes |
 |---|---|---|---|
@@ -42,6 +52,8 @@ Hierarchy: *diabetes with chronic complication* replaces *diabetes without*, *mo
 | `rcs` | [Armitage 2010](references.md#armitage2010) | ICD&#8209;10 | Always RCS weights; no *peptic ulcer*; liver disease and diabetes not split by severity |
 | `uk_shmi` | [NHS Digital 2026](references.md#nhs2026) | ICD&#8209;10 | Version 1.60 (June 2026). Always SHMI weights |
 | `sokolowski` | [Sokołowski 2026](references.md#sokolowski2026) | ICD&#8209;10&#8209;GM | Germany; year-specific, **requires `year_col`** |
+
+</div>
 
 ### `weights`
 
@@ -63,14 +75,20 @@ Hierarchy: *complicated* replaces *uncomplicated* diabetes and hypertension, and
 
 ### `implementation`
 
+<div class="wide-4" markdown="1">
+
 | Value | Reference | ICD | Notes |
 |---|---|---|---|
 | `quan` (default) | [Quan 2005](references.md#quan2005) | ICD&#8209;9&#8209;CM, ICD&#8209;10 | |
 | `elixhauser` | [Elixhauser 1998](references.md#elixhauser1998) | ICD&#8209;9&#8209;CM | |
 | `ahrq_icd9` | [AHRQ v3.7](references.md#ahrq-icd9) | ICD&#8209;9&#8209;CM | No *cardiac arrhythmias*. Always AHRQ weights |
-| `ahrq_icd10` | [AHRQ Refined v2026.1](references.md#ahrq-icd10) | ICD&#8209;10&#8209;CM | Year-specific, **requires `year_col`**. Always AHRQ weights. Different category set: no *cardiac arrhythmias* or *fluid and electrolyte disorders*; adds e.g. *dementia*, *leukemia*, *seizures and epilepsy* |
+| `ahrq_icd10` | [AHRQ&nbsp;Refined v2026.1](references.md#ahrq-icd10) | ICD&#8209;10&#8209;CM | Year-specific, **requires `year_col`**. Always AHRQ weights. Different category set: no *cardiac arrhythmias* or *fluid and electrolyte disorders*; adds e.g. *dementia*, *leukemia*, *seizures and epilepsy* |
+
+</div>
 
 ### `weights`
+
+<div class="wide-2 wide-3" markdown="1">
 
 | Value | Reference | Notes |
 |---|---|---|
@@ -78,7 +96,9 @@ Hierarchy: *complicated* replaces *uncomplicated* diabetes and hypertension, and
 | `thompson_30` | [Thompson 2015](references.md#thompson2015) | |
 | `thompson_29` | [Thompson 2015](references.md#thompson2015) | |
 | `swiss` | [Sharma 2021](references.md#sharma2021) | |
-| `ahrq` | [Moore 2017](references.md#moore2017) (ICD-9-CM), [AHRQ Refined v2026.1](references.md#ahrq-icd10) (ICD-10-CM) | Picked by `icd_version`; `ahrq_icd9` / `ahrq_icd10` enforce it |
+| `ahrq` | [Moore 2017](references.md#moore2017) (ICD-9-CM), [AHRQ&nbsp;Refined v2026.1](references.md#ahrq-icd10) (ICD-10-CM) | Picked by `icd_version`; `ahrq_icd9` / `ahrq_icd10` enforce it |
+
+</div>
 
 The `ahrq_icd9` / `ahrq_icd10` implementations also replace any other `weights` value with a `UserWarning`. `weights="ahrq"` does not work with `icd_version="icd9_10"` (`ValueError`).
 
@@ -86,10 +106,14 @@ The `ahrq_icd9` / `ahrq_icd10` implementations also replace any other `weights` 
 
 20 categories, no `implementation` or `weights` options. `icd_version` selects the mapping:
 
+<div class="wide-3" markdown="1">
+
 | `icd_version` | Reference | Notes |
 |---|---|---|
 | `icd9` | [Gagne 2011](references.md#gagne2011) | Charlson conditions after Romano 1993, Elixhauser conditions after Quan 2005 |
 | `icd10` | [Sun 2017](references.md#sun2017) | ICD&#8209;10&#8209;CM |
+
+</div>
 
 Weights are those of [Gagne 2011](references.md#gagne2011).
 
