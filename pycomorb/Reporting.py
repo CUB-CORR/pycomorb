@@ -266,7 +266,7 @@ def comorbidity_reporting(
     icd_modification: str | None = None,
     path: Path | str | None = None,
     **study_info: str,
-):
+) -> tuple[pl.DataFrame, pl.DataFrame, pl.DataFrame, pl.DataFrame]:
     """Reporting template for a comorbidity score, with the information needed to reproduce it.
 
     Args:
@@ -310,7 +310,7 @@ def comorbidity_reporting(
     return tuple(tables.values())
 
 
-def read_reporting(path: Path | str):
+def read_reporting(path: Path | str) -> dict:
     """Read the tables written by ``comorbidity_reporting`` back in.
 
     The result holds the arguments of a custom score that reproduces the reported one::

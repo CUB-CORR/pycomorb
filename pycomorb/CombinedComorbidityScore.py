@@ -39,7 +39,7 @@ def CombinedComorbidityScore(
     icd_version: str = "icd10",
     icd_version_col: str | None = None,
     return_categories=False,
-):
+) -> pl.DataFrame:
     """Calculate the Combined Comorbidity Score using ICD codes.
 
     Args:

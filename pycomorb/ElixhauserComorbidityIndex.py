@@ -75,7 +75,7 @@ def ElixhauserComorbidityIndex(
     implementation: str = "quan",
     weights: str = "van_walraven",
     return_categories=False,
-):
+) -> pl.DataFrame:
     """Calculate the Elixhauser Comorbidity Index (ECI) using ICD codes.
 
     Args:

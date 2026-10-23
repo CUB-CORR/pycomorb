@@ -25,7 +25,7 @@ def HospitalFrailtyRiskScore(
     code_col: str = "code",
     icd_version: str = "icd10",
     return_categories=False,
-):
+) -> pl.DataFrame:
     """Calculate the Hospital Frailty Risk Score (HFRS) using ICD-10 codes.
 
     Args:

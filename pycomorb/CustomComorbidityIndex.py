@@ -64,7 +64,7 @@ def CustomComorbidityIndex(
     mutual_exclusion_rules: list[tuple[str, str]] | None = None,
     year_col: str | None = None,
     return_categories=False,
-):
+) -> pl.DataFrame:
     """Compute a custom comorbidity score from ICD-coded input data.
 
     Args:

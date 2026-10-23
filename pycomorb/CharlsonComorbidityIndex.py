@@ -105,7 +105,7 @@ def CharlsonComorbidityIndex(
     implementation: str = "quan",
     weights: str = "charlson",
     return_categories: bool = False,
-):
+) -> pl.DataFrame:
     """Calculate the Charlson Comorbidity Index (CCI) using ICD codes and age.
 
     Args:

@@ -64,12 +64,12 @@ def comorbidity(
     score_col_name: str = "Custom Comorbidity Score",
     mutual_exclusion_rules: list[tuple[str, str]] | None = None,
     return_categories: bool = False,
-):
+) -> pl.DataFrame | pd.DataFrame:
     """Calculate a comorbidity or frailty score from ICD-coded data.
 
     Args:
         score (str): Name of the score to calculate. Supported values are ``"charlson"``, ``"elixhauser"``, ``"combined"``, ``"hfrs"``, and ``"custom"`` (case-insensitive and including common aliases such as ``"cci"`` or ``"eci"``).
-        df (pl.DataFrame | pandas.DataFrame): Input data containing at least ``id_col`` and ``code_col``. Additional columns such as ``age_col`` or ``year_col`` are required depending on the chosen score.
+        df (pl.DataFrame | pd.DataFrame): Input data containing at least ``id_col`` and ``code_col``. Additional columns such as ``age_col`` or ``year_col`` are required depending on the chosen score.
         id_col (str, optional): Column name containing unique identifiers. Defaults to ``"id"``.
         code_col (str, optional): Column name containing ICD codes. Defaults to ``"code"``.
         age_col (str, optional): Column name containing patient ages (required for Charlson calculations). Defaults to ``"age"``.
@@ -80,7 +80,7 @@ def comorbidity(
         icd_modification_target_year (int, optional): Target year for ICD modification mappings (ICD-10-GM: 2004-2026, ICD-10-CM: 2015-2027). Defaults to the earliest year of the chosen modification (``2004`` for ``"icd10gm"``, ``2015`` for ``"icd10cm"``).
         implementation (str, optional): Implementation variant for the selected score (for example ``"quan"``, ``"deyo"``, ``"elixhauser"``). Defaults to ``None``.
         weights (str, optional): Weighting scheme for the Elixhauser index. Defaults to ``None``.
-        definition_data (pl.DataFrame | pandas.DataFrame | Path | str, optional): Definition table for custom indices, either as a DataFrame or a path to a CSV file. Defaults to ``None``.
+        definition_data (pl.DataFrame | pd.DataFrame | Path | str, optional): Definition table for custom indices, either as a DataFrame or a path to a CSV file. Defaults to ``None``.
         definition_file_path (str, optional): Path to a CSV containing custom index definitions. Ignored when ``definition_data`` is a DataFrame. Defaults to ``None``.
         weight_col_name (str, optional): Column name with weights in ``definition_data``. Defaults to ``"weights"``.
         score_col_name (str, optional): Column name assigned to the calculated score for custom indices. Defaults to ``"Custom Comorbidity Score"``.
@@ -88,12 +88,12 @@ def comorbidity(
         return_categories (bool, optional): If ``True``, includes category indicator columns in the result. Defaults to ``False``.
 
     Returns:
-        pl.DataFrame | pandas.DataFrame: DataFrame containing the calculated score and, when ``return_categories`` is ``True``, the category indicators. If the input was a pandas DataFrame, the output matches that type.
+        pl.DataFrame | pd.DataFrame: DataFrame containing the calculated score and, when ``return_categories`` is ``True``, the category indicators. If the input was a pandas DataFrame, the output matches that type.
 
     Raises:
         ValueError: If the requested ``score`` or ``icd_modification`` is not supported, or required columns are missing.
 
-    Example:
+    Examples:
         Compute a Charlson score with category indicators and automatic ICD-10-GM harmonization:
 
         >>> import polars as pl
@@ -106,22 +106,23 @@ def comorbidity(
         ...         "year": [2012, 2012, 2010],
         ...     }
         ... )
-        >>> comorbidity(
+        >>> result = comorbidity(
         ...     score="charlson",
         ...     df=diagnoses,
         ...     icd_version="icd10",
         ...     icd_modification="icd10gm",
         ...     return_categories=True,
         ... )
-        shape: (2, 22)
-        ┌─────┬───────────────────────┬──────────────────────────┬───┬───────────┬────────────────┐
-        │ id  ┆ Myocardial infarction ┆ Congestive heart failure ┆ … ┆ Age Score ┆ Charlson Score │
-        │ --- ┆ ---                   ┆ ---                      ┆   ┆ ---       ┆ ---            │
-        │ i64 ┆ i32                   ┆ i32                      ┆   ┆ i64       ┆ i64            │
-        ╞═════╪═══════════════════════╪══════════════════════════╪═══╪═══════════╪════════════════╡
-        │ 1   ┆ 1                     ┆ 0                        ┆ … ┆ 1         ┆ 3              │
-        │ 2   ┆ 0                     ┆ 0                        ┆ … ┆ 2         ┆ 4              │
-        └─────┴───────────────────────┴──────────────────────────┴───┴───────────┴────────────────┘
+        >>> result.select("id", "Age Score", "Charlson Age-Comorbidity Score").sort("id")
+        shape: (2, 3)
+        ┌─────┬───────────┬────────────────────────────────┐
+        │ id  ┆ Age Score ┆ Charlson Age-Comorbidity Score │
+        │ --- ┆ ---       ┆ ---                            │
+        │ i64 ┆ i64       ┆ i64                            │
+        ╞═════╪═══════════╪════════════════════════════════╡
+        │ 1   ┆ 2         ┆ 4                              │
+        │ 2   ┆ 4         ┆ 6                              │
+        └─────┴───────────┴────────────────────────────────┘
     """
 
     # Check if input is pandas DataFrame and convert to polars
