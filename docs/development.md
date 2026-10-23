@@ -13,8 +13,8 @@ The definition and weight files live in `common/` and are copied into the packag
 
 ```bash
 pip install -e ".[docs]"
-mkdocs serve               # live preview at http://127.0.0.1:8000
-mkdocs build --strict      # as in CI: fails on warnings
+zensical serve             # live preview at http://127.0.0.1:8000
+zensical build --clean     # as in CI
 ```
 
 The API page is generated from the Google-style docstrings; everything else is in `docs/`. Pushes to `main` deploy the site to GitHub Pages.

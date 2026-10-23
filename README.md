@@ -157,5 +157,5 @@ The resulting `template.md` (study information you don't pass stays empty, to be
 
 - Free software: MIT license (see [LICENSE](https://github.com/CUB-CORR/pycomorb/blob/main/LICENSE))
 - Citation: see [CITATION.cff](https://github.com/CUB-CORR/pycomorb/blob/main/CITATION.cff) (GitHub "Cite this repository" button)
-- Documentation: (TODO)
+- Documentation: <https://cub-corr.github.io/pycomorb/>
 - Data sources and attributions (incl. BfArM ICD-10-GM): see [NOTICE](https://github.com/CUB-CORR/pycomorb/blob/main/NOTICE); variant references in [common/README.md](https://github.com/CUB-CORR/pycomorb/blob/main/common/README.md)
